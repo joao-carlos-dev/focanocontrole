@@ -82,7 +82,7 @@ function Dashboard() {
       totalSavings: totalSav,
       totalIncome: totalInc,
     };
-  }, [categories, entries]);
+  }, [categories, entries, recurring]);
 
   const rowProps = {
     recurring,
