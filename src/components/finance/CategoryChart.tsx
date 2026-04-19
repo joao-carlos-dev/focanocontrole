@@ -34,10 +34,12 @@ export function CategoryChart({ categories, entries }: Props) {
   const data = useMemo(() => {
     const totalsByCat: Record<string, number> = {};
     for (const e of entries) {
-      // Roll subcategory amounts into parent
       const cat = categories.find((c) => c.id === e.category_id);
       if (!cat) continue;
-      const rootId = cat.parent_id ?? cat.id;
+      const root = categories.find((c) => c.id === (cat.parent_id ?? cat.id)) ?? cat;
+      // Exclude income from distribution charts (focus on outflows + savings)
+      if (root.kind === "income") continue;
+      const rootId = root.id;
       totalsByCat[rootId] = (totalsByCat[rootId] || 0) + e.amount;
     }
     return Object.entries(totalsByCat)
