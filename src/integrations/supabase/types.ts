@@ -93,6 +93,36 @@ export type Database = {
           },
         ]
       }
+      recurring_amounts: {
+        Row: {
+          active: boolean
+          amount: number
+          category_id: string
+          created_at: string
+          id: string
+          note: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount?: number
+          category_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          category_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
