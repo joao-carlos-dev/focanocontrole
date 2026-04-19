@@ -1,19 +1,33 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Plus, Trash2, Pencil, Check, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+  Pin,
+  PinOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatBRL } from "@/lib/format";
-import type { Category, Entry } from "@/hooks/use-finance";
+import type { Category, Entry, Recurring } from "@/hooks/use-finance";
+import { RecurringDialog } from "./RecurringDialog";
 
 interface Props {
   category: Category;
   subcategories: Category[];
   entries: Entry[];
   allEntries: Entry[];
+  recurring: Recurring[];
   onAddEntry: (categoryId: string, amount: number, note?: string) => Promise<void>;
   onUpdateEntry: (id: string, amount: number, note?: string) => Promise<void>;
   onDeleteEntry: (id: string) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
+  onSetRecurring: (categoryId: string, amount: number, note?: string) => Promise<void>;
+  onRemoveRecurring: (categoryId: string) => Promise<void>;
 }
 
 export function CategoryRow({
@@ -21,10 +35,13 @@ export function CategoryRow({
   subcategories,
   entries,
   allEntries,
+  recurring,
   onAddEntry,
   onUpdateEntry,
   onDeleteEntry,
   onDeleteCategory,
+  onSetRecurring,
+  onRemoveRecurring,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
@@ -33,6 +50,7 @@ export function CategoryRow({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editNote, setEditNote] = useState("");
+  const [recurringFor, setRecurringFor] = useState<Category | null>(null);
 
   const directEntries = entries.filter((e) => e.category_id === category.id);
   const subEntries = subcategories.flatMap((s) =>
@@ -50,6 +68,10 @@ export function CategoryRow({
       ? "text-savings"
       : "text-foreground";
   const dotColor = isIncome ? "bg-income" : isSavings ? "bg-savings" : "bg-primary";
+
+  const recurringForCat = (catId: string) =>
+    recurring.find((r) => r.category_id === catId);
+  const isPinned = !!recurringForCat(category.id);
 
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
@@ -187,90 +209,151 @@ export function CategoryRow({
   );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elegant)]">
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
-      >
-        <div className={`h-2 w-2 rounded-full ${dotColor}`} />
-        {subcategories.length > 0 ? (
-          expanded ? (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          )
-        ) : (
-          <div className="w-4" />
-        )}
-        <div className="flex-1">
-          <div className="font-semibold tracking-tight">{category.name}</div>
-          {isSavings && (
-            <div className="text-[10px] uppercase tracking-wider text-savings">Poupar</div>
-          )}
-          {isIncome && (
-            <div className="text-[10px] uppercase tracking-wider text-income">Receita</div>
-          )}
-        </div>
-        <div className={`text-base font-bold tabular-nums ${accentColor}`}>
-          {formatBRL(total)}
-        </div>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-7 w-7 text-muted-foreground hover:text-destructive"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (confirm(`Excluir categoria "${category.name}" e todos os lançamentos?`)) {
-              onDeleteCategory(category.id);
-            }
-          }}
+    <>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elegant)]">
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
         >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
-      </button>
-
-      {expanded && (
-        <div className="border-t border-border bg-background/30 p-3">
-          {subcategories.length === 0 ? (
-            renderEntries(category.id, directEntries)
+          <div className={`h-2 w-2 rounded-full ${dotColor}`} />
+          {subcategories.length > 0 ? (
+            expanded ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )
           ) : (
-            <div className="space-y-3">
-              {directEntries.length > 0 && renderEntries(category.id, directEntries)}
-              {subcategories.map((sub) => {
-                const subList = allEntries.filter((e) => e.category_id === sub.id);
-                const subTotal = subList.reduce((s, e) => s + e.amount, 0);
-                return (
-                  <div
-                    key={sub.id}
-                    className="rounded-xl border border-border/60 bg-card/60 p-3"
-                  >
-                    <div className="mb-2 flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-accent" />
-                      <span className="text-sm font-medium">{sub.name}</span>
-                      <span className="ml-auto text-sm font-semibold tabular-nums">
-                        {formatBRL(subTotal)}
-                      </span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                        onClick={() => {
-                          if (confirm(`Excluir subcategoria "${sub.name}"?`)) {
-                            onDeleteCategory(sub.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    {renderEntries(sub.id, subList)}
-                  </div>
-                );
-              })}
-            </div>
+            <div className="w-4" />
           )}
-        </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="truncate font-semibold tracking-tight">
+                {category.name}
+              </span>
+              {isPinned && (
+                <span
+                  title="Conta fixa mensal"
+                  className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-primary"
+                >
+                  <Pin className="h-2.5 w-2.5" /> fixo
+                </span>
+              )}
+            </div>
+            {isSavings && (
+              <div className="text-[10px] uppercase tracking-wider text-savings">Poupar</div>
+            )}
+            {isIncome && (
+              <div className="text-[10px] uppercase tracking-wider text-income">Receita</div>
+            )}
+          </div>
+          <div className={`text-base font-bold tabular-nums ${accentColor}`}>
+            {formatBRL(total)}
+          </div>
+          {subcategories.length === 0 && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className={`h-7 w-7 ${isPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setRecurringFor(category);
+              }}
+              title={isPinned ? "Editar valor fixo" : "Fixar todo mês"}
+            >
+              {isPinned ? (
+                <Pin className="h-3.5 w-3.5 fill-current" />
+              ) : (
+                <PinOff className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          )}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (confirm(`Excluir categoria "${category.name}" e todos os lançamentos?`)) {
+                onDeleteCategory(category.id);
+              }
+            }}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </button>
+
+        {expanded && (
+          <div className="border-t border-border bg-background/30 p-3">
+            {subcategories.length === 0 ? (
+              renderEntries(category.id, directEntries)
+            ) : (
+              <div className="space-y-3">
+                {directEntries.length > 0 && renderEntries(category.id, directEntries)}
+                {subcategories.map((sub) => {
+                  const subList = allEntries.filter((e) => e.category_id === sub.id);
+                  const subTotal = subList.reduce((s, e) => s + e.amount, 0);
+                  const subPinned = !!recurringForCat(sub.id);
+                  return (
+                    <div
+                      key={sub.id}
+                      className="rounded-xl border border-border/60 bg-card/60 p-3"
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                        <span className="text-sm font-medium">{sub.name}</span>
+                        {subPinned && (
+                          <Pin className="h-3 w-3 fill-current text-primary" />
+                        )}
+                        <span className="ml-auto text-sm font-semibold tabular-nums">
+                          {formatBRL(subTotal)}
+                        </span>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className={`h-6 w-6 ${subPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
+                          onClick={() => setRecurringFor(sub)}
+                          title={subPinned ? "Editar valor fixo" : "Fixar todo mês"}
+                        >
+                          {subPinned ? (
+                            <Pin className="h-3 w-3 fill-current" />
+                          ) : (
+                            <PinOff className="h-3 w-3" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                          onClick={() => {
+                            if (confirm(`Excluir subcategoria "${sub.name}"?`)) {
+                              onDeleteCategory(sub.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      {renderEntries(sub.id, subList)}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {recurringFor && (
+        <RecurringDialog
+          open={!!recurringFor}
+          onOpenChange={(v) => !v && setRecurringFor(null)}
+          categoryName={recurringFor.name}
+          categoryId={recurringFor.id}
+          current={recurringForCat(recurringFor.id)}
+          onSave={onSetRecurring}
+          onRemove={onRemoveRecurring}
+        />
       )}
-    </div>
+    </>
   );
 }
