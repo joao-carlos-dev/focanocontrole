@@ -1,20 +1,21 @@
-import { TrendingDown, PiggyBank, Wallet } from "lucide-react";
+import { TrendingDown, PiggyBank, Wallet, TrendingUp } from "lucide-react";
 import { formatBRL } from "@/lib/format";
 
 interface Props {
+  totalIncome: number;
   totalExpense: number;
   totalSavings: number;
 }
 
-export function SummaryCards({ totalExpense, totalSavings }: Props) {
-  const total = totalExpense + totalSavings;
+export function SummaryCards({ totalIncome, totalExpense, totalSavings }: Props) {
+  const balance = totalIncome - totalExpense - totalSavings;
   const cards = [
     {
-      label: "Total geral",
-      value: total,
-      icon: Wallet,
-      accent: "from-primary/30 to-accent/20",
-      iconColor: "text-primary",
+      label: "Receitas",
+      value: totalIncome,
+      icon: TrendingUp,
+      accent: "from-income/30 to-accent/20",
+      iconColor: "text-income",
     },
     {
       label: "Gastos",
@@ -30,10 +31,17 @@ export function SummaryCards({ totalExpense, totalSavings }: Props) {
       accent: "from-savings/30 to-accent/20",
       iconColor: "text-savings",
     },
+    {
+      label: "Saldo do mês",
+      value: balance,
+      icon: Wallet,
+      accent: "from-primary/30 to-accent/20",
+      iconColor: balance >= 0 ? "text-income" : "text-destructive",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {cards.map((c) => (
         <div
           key={c.label}
@@ -47,7 +55,7 @@ export function SummaryCards({ totalExpense, totalSavings }: Props) {
               <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {c.label}
               </div>
-              <div className="mt-1.5 text-2xl font-bold tracking-tight">
+              <div className="mt-1.5 text-xl font-bold tracking-tight sm:text-2xl">
                 {formatBRL(c.value)}
               </div>
             </div>

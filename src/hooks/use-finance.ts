@@ -5,7 +5,7 @@ export type Category = {
   id: string;
   name: string;
   parent_id: string | null;
-  kind: "expense" | "savings";
+  kind: "expense" | "savings" | "income";
   sort_order: number;
 };
 
@@ -99,7 +99,7 @@ export function useFinance(year: number, month: number) {
 
   const addCategory = async (
     name: string,
-    kind: "expense" | "savings",
+    kind: "expense" | "savings" | "income",
     parent_id: string | null = null,
   ) => {
     const max = Math.max(0, ...categories.map((c) => c.sort_order));
