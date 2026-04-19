@@ -38,26 +38,31 @@ function Dashboard() {
     deleteCategory,
   } = useFinance(year, month);
 
-  const { rootExpenses, savings, totalExpense, totalSavings } = useMemo(() => {
+  const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
     const roots = categories.filter((c) => !c.parent_id);
     const rootExp = roots.filter((c) => c.kind === "expense");
     const sav = roots.filter((c) => c.kind === "savings");
+    const inc = roots.filter((c) => c.kind === "income");
 
     let totalExp = 0;
     let totalSav = 0;
+    let totalInc = 0;
     for (const e of entries) {
       const cat = categories.find((c) => c.id === e.category_id);
       if (!cat) continue;
       const root =
         categories.find((c) => c.id === (cat.parent_id ?? cat.id)) ?? cat;
       if (root.kind === "savings") totalSav += e.amount;
+      else if (root.kind === "income") totalInc += e.amount;
       else totalExp += e.amount;
     }
     return {
       rootExpenses: rootExp,
       savings: sav,
+      incomes: inc,
       totalExpense: totalExp,
       totalSavings: totalSav,
+      totalIncome: totalInc,
     };
   }, [categories, entries]);
 
@@ -91,9 +96,41 @@ function Dashboard() {
           </div>
         </header>
 
-        <SummaryCards totalExpense={totalExpense} totalSavings={totalSavings} />
+        <SummaryCards
+          totalIncome={totalIncome}
+          totalExpense={totalExpense}
+          totalSavings={totalSavings}
+        />
 
         <CategoryChart categories={categories} entries={entries} />
+
+        {/* Incomes */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-income">
+            Receitas
+          </h2>
+          {loading ? (
+            <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+              Carregando...
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {incomes.map((cat) => (
+                <CategoryRow
+                  key={cat.id}
+                  category={cat}
+                  subcategories={[]}
+                  entries={entries}
+                  allEntries={entries}
+                  onAddEntry={addEntry}
+                  onUpdateEntry={updateEntry}
+                  onDeleteEntry={deleteEntry}
+                  onDeleteCategory={deleteCategory}
+                />
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Expenses */}
         <section className="space-y-3">

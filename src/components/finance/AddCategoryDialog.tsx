@@ -24,7 +24,7 @@ interface Props {
   categories: Category[];
   onAdd: (
     name: string,
-    kind: "expense" | "savings",
+    kind: "expense" | "savings" | "income",
     parent_id: string | null,
   ) => Promise<unknown>;
 }
@@ -32,7 +32,7 @@ interface Props {
 export function AddCategoryDialog({ categories, onAdd }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [kind, setKind] = useState<"expense" | "savings">("expense");
+  const [kind, setKind] = useState<"expense" | "savings" | "income">("expense");
   const [parentId, setParentId] = useState<string>("none");
 
   const parents = categories.filter((c) => !c.parent_id && c.kind === "expense");
@@ -70,13 +70,14 @@ export function AddCategoryDialog({ categories, onAdd }: Props) {
           </div>
           <div className="space-y-2">
             <Label>Tipo</Label>
-            <Select value={kind} onValueChange={(v) => setKind(v as "expense" | "savings")}>
+            <Select value={kind} onValueChange={(v) => setKind(v as "expense" | "savings" | "income")}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="expense">Gasto</SelectItem>
                 <SelectItem value="savings">Guardar dinheiro</SelectItem>
+                <SelectItem value="income">Receita / Salário</SelectItem>
               </SelectContent>
             </Select>
           </div>
