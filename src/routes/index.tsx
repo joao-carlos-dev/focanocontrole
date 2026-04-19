@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Wallet } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Wallet, BarChart3 } from "lucide-react";
 import { useFinance } from "@/hooks/use-finance";
 import { MonthSelector } from "@/components/finance/MonthSelector";
 import { SummaryCards } from "@/components/finance/SummaryCards";
 import { CategoryChart } from "@/components/finance/CategoryChart";
 import { CategoryRow } from "@/components/finance/CategoryRow";
 import { AddCategoryDialog } from "@/components/finance/AddCategoryDialog";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,12 +31,15 @@ function Dashboard() {
   const {
     categories,
     entries,
+    recurring,
     loading,
     addEntry,
     updateEntry,
     deleteEntry,
     addCategory,
     deleteCategory,
+    setRecurringForCategory,
+    removeRecurringForCategory,
   } = useFinance(year, month);
 
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
@@ -66,6 +70,16 @@ function Dashboard() {
     };
   }, [categories, entries]);
 
+  const rowProps = {
+    recurring,
+    onAddEntry: addEntry,
+    onUpdateEntry: updateEntry,
+    onDeleteEntry: deleteEntry,
+    onDeleteCategory: deleteCategory,
+    onSetRecurring: setRecurringForCategory,
+    onRemoveRecurring: removeRecurringForCategory,
+  };
+
   return (
     <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -84,7 +98,13 @@ function Dashboard() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link to="/visao-anual">
+              <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
+                <BarChart3 className="h-4 w-4" />
+                Visão anual
+              </Button>
+            </Link>
             <MonthSelector
               year={year}
               month={month}
@@ -122,10 +142,7 @@ function Dashboard() {
                   subcategories={[]}
                   entries={entries}
                   allEntries={entries}
-                  onAddEntry={addEntry}
-                  onUpdateEntry={updateEntry}
-                  onDeleteEntry={deleteEntry}
-                  onDeleteCategory={deleteCategory}
+                  {...rowProps}
                 />
               ))}
             </div>
@@ -155,10 +172,7 @@ function Dashboard() {
                     subcategories={subs}
                     entries={entries}
                     allEntries={entries}
-                    onAddEntry={addEntry}
-                    onUpdateEntry={updateEntry}
-                    onDeleteEntry={deleteEntry}
-                    onDeleteCategory={deleteCategory}
+                    {...rowProps}
                   />
                 );
               })}
@@ -179,10 +193,7 @@ function Dashboard() {
                 subcategories={[]}
                 entries={entries}
                 allEntries={entries}
-                onAddEntry={addEntry}
-                onUpdateEntry={updateEntry}
-                onDeleteEntry={deleteEntry}
-                onDeleteCategory={deleteCategory}
+                {...rowProps}
               />
             ))}
           </div>
