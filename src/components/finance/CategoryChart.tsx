@@ -113,7 +113,7 @@ export function CategoryChart({ categories, entries }: Props) {
                   border: "1px solid var(--border)",
                   borderRadius: "0.75rem",
                 }}
-                formatter={(v: number) => formatBRL(v)}
+                formatter={(v) => formatBRL(Number(v))}
               />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                 {data.map((_, i) => (
