@@ -43,8 +43,13 @@ export function CategoryRow({
     subEntries.reduce((s, e) => s + e.amount, 0);
 
   const isSavings = category.kind === "savings";
-  const accentColor = isSavings ? "text-savings" : "text-foreground";
-  const dotColor = isSavings ? "bg-savings" : "bg-primary";
+  const isIncome = category.kind === "income";
+  const accentColor = isIncome
+    ? "text-income"
+    : isSavings
+      ? "text-savings"
+      : "text-foreground";
+  const dotColor = isIncome ? "bg-income" : isSavings ? "bg-savings" : "bg-primary";
 
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
@@ -201,6 +206,9 @@ export function CategoryRow({
           <div className="font-semibold tracking-tight">{category.name}</div>
           {isSavings && (
             <div className="text-[10px] uppercase tracking-wider text-savings">Poupar</div>
+          )}
+          {isIncome && (
+            <div className="text-[10px] uppercase tracking-wider text-income">Receita</div>
           )}
         </div>
         <div className={`text-base font-bold tabular-nums ${accentColor}`}>
