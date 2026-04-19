@@ -85,7 +85,7 @@ export function CategoryChart({ categories, entries }: Props) {
                   borderRadius: "0.75rem",
                   color: "var(--popover-foreground)",
                 }}
-                formatter={(v: number) => formatBRL(v)}
+                formatter={(v) => formatBRL(Number(v))}
               />
             </PieChart>
           </ResponsiveContainer>
