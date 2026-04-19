@@ -44,7 +44,21 @@ function Dashboard() {
 
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
     const roots = categories.filter((c) => !c.parent_id);
-    const rootExp = roots.filter((c) => c.kind === "expense");
+    const recurringCatIds = new Set(recurring.filter((r) => r.active).map((r) => r.category_id));
+    const isPinned = (cat: typeof categories[number]) => {
+      if (recurringCatIds.has(cat.id)) return true;
+      return categories.some(
+        (c) => c.parent_id === cat.id && recurringCatIds.has(c.id),
+      );
+    };
+    const rootExp = roots
+      .filter((c) => c.kind === "expense")
+      .sort((a, b) => {
+        const pa = isPinned(a) ? 1 : 0;
+        const pb = isPinned(b) ? 1 : 0;
+        if (pa !== pb) return pb - pa;
+        return a.sort_order - b.sort_order;
+      });
     const sav = roots.filter((c) => c.kind === "savings");
     const inc = roots.filter((c) => c.kind === "income");
 
