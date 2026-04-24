@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/hooks/use-auth";
 import {
   ArrowLeft,
   TrendingUp,
@@ -51,6 +52,11 @@ function AnnualView() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/auth" });
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     setLoading(true);

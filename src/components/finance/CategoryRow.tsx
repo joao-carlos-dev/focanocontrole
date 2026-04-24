@@ -9,9 +9,11 @@ import {
   X,
   Pin,
   PinOff,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatBRL } from "@/lib/format";
 import type { Category, Entry, Recurring } from "@/hooks/use-finance";
 import { RecurringDialog } from "./RecurringDialog";
@@ -22,11 +24,27 @@ interface Props {
   entries: Entry[];
   allEntries: Entry[];
   recurring: Recurring[];
-  onAddEntry: (categoryId: string, amount: number, note?: string) => Promise<void>;
-  onUpdateEntry: (id: string, amount: number, note?: string) => Promise<void>;
+  onAddEntry: (
+    categoryId: string,
+    amount: number,
+    note?: string,
+    due_date?: string | null,
+  ) => Promise<void>;
+  onUpdateEntry: (
+    id: string,
+    amount: number,
+    note?: string,
+    due_date?: string | null,
+  ) => Promise<void>;
+  onTogglePaid: (id: string, paid: boolean) => Promise<void>;
   onDeleteEntry: (id: string) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
-  onSetRecurring: (categoryId: string, amount: number, note?: string) => Promise<void>;
+  onSetRecurring: (
+    categoryId: string,
+    amount: number,
+    note?: string,
+    due_day?: number | null,
+  ) => Promise<void>;
   onRemoveRecurring: (categoryId: string) => Promise<void>;
 }
 
@@ -38,6 +56,7 @@ export function CategoryRow({
   recurring,
   onAddEntry,
   onUpdateEntry,
+  onTogglePaid,
   onDeleteEntry,
   onDeleteCategory,
   onSetRecurring,
@@ -47,9 +66,11 @@ export function CategoryRow({
   const [adding, setAdding] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editNote, setEditNote] = useState("");
+  const [editDueDate, setEditDueDate] = useState("");
   const [recurringFor, setRecurringFor] = useState<Category | null>(null);
 
   const directEntries = entries.filter((e) => e.category_id === category.id);
@@ -62,6 +83,7 @@ export function CategoryRow({
 
   const isSavings = category.kind === "savings";
   const isIncome = category.kind === "income";
+  const isExpense = !isSavings && !isIncome;
   const accentColor = isIncome
     ? "text-income"
     : isSavings
@@ -76,9 +98,10 @@ export function CategoryRow({
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
     if (isNaN(v) || v <= 0) return;
-    await onAddEntry(catId, v, note);
+    await onAddEntry(catId, v, note, dueDate || null);
     setAmount("");
     setNote("");
+    setDueDate("");
     setAdding(null);
   };
 
@@ -86,82 +109,123 @@ export function CategoryRow({
     setEditingId(e.id);
     setEditAmount(String(e.amount));
     setEditNote(e.note || "");
+    setEditDueDate(e.due_date || "");
   };
 
   const saveEdit = async (id: string) => {
     const v = parseFloat(editAmount.replace(",", "."));
     if (isNaN(v) || v < 0) return;
-    await onUpdateEntry(id, v, editNote);
+    await onUpdateEntry(id, v, editNote, editDueDate || null);
     setEditingId(null);
+  };
+
+  const dueLabel = (e: Entry): { text: string; cls: string } | null => {
+    if (!e.due_date) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(e.due_date + "T00:00:00");
+    const diffDays = Math.round((due.getTime() - today.getTime()) / 86400000);
+    const txt = `Vence ${due.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`;
+    if (e.paid) return { text: txt, cls: "text-muted-foreground" };
+    if (diffDays < 0) return { text: `${txt} • atrasada`, cls: "text-destructive" };
+    if (diffDays === 0) return { text: `${txt} • hoje`, cls: "text-destructive" };
+    if (diffDays <= 2) return { text: `${txt} • em ${diffDays}d`, cls: "text-amber-400" };
+    return { text: txt, cls: "text-muted-foreground" };
   };
 
   const renderEntries = (catId: string, list: Entry[]) => (
     <div className="space-y-1.5">
-      {list.map((e) => (
-        <div
-          key={e.id}
-          className="flex items-center gap-2 rounded-lg bg-background/40 px-3 py-2 text-sm"
-        >
-          {editingId === e.id ? (
-            <>
-              <Input
-                value={editAmount}
-                onChange={(ev) => setEditAmount(ev.target.value)}
-                className="h-8 w-24"
-                inputMode="decimal"
-              />
-              <Input
-                value={editNote}
-                onChange={(ev) => setEditNote(ev.target.value)}
-                placeholder="Nota"
-                className="h-8 flex-1"
-              />
-              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => saveEdit(e.id)}>
-                <Check className="h-4 w-4 text-primary" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8"
-                onClick={() => setEditingId(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </>
-          ) : (
-            <>
-              <span className="font-medium">{formatBRL(e.amount)}</span>
-              {e.note && (
-                <span className="truncate text-xs text-muted-foreground">— {e.note}</span>
-              )}
-              <span className="ml-auto text-xs text-muted-foreground">
-                {new Date(e.entry_date).toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                })}
-              </span>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7"
-                onClick={() => startEdit(e)}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 text-destructive hover:text-destructive"
-                onClick={() => onDeleteEntry(e.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </>
-          )}
-        </div>
-      ))}
+      {list.map((e) => {
+        const due = dueLabel(e);
+        return (
+          <div
+            key={e.id}
+            className={`flex flex-wrap items-center gap-2 rounded-lg bg-background/40 px-3 py-2 text-sm ${e.paid ? "opacity-60" : ""}`}
+          >
+            {editingId === e.id ? (
+              <>
+                <Input
+                  value={editAmount}
+                  onChange={(ev) => setEditAmount(ev.target.value)}
+                  className="h-8 w-24"
+                  inputMode="decimal"
+                />
+                <Input
+                  value={editNote}
+                  onChange={(ev) => setEditNote(ev.target.value)}
+                  placeholder="Nota"
+                  className="h-8 flex-1 min-w-[120px]"
+                />
+                {isExpense && (
+                  <Input
+                    type="date"
+                    value={editDueDate}
+                    onChange={(ev) => setEditDueDate(ev.target.value)}
+                    className="h-8 w-[140px]"
+                  />
+                )}
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => saveEdit(e.id)}>
+                  <Check className="h-4 w-4 text-primary" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  onClick={() => setEditingId(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                {isExpense && (
+                  <Checkbox
+                    checked={e.paid}
+                    onCheckedChange={(v) => onTogglePaid(e.id, !!v)}
+                    title={e.paid ? "Marcar como não paga" : "Marcar como paga"}
+                  />
+                )}
+                <span className={`font-medium ${e.paid ? "line-through" : ""}`}>
+                  {formatBRL(e.amount)}
+                </span>
+                {e.note && (
+                  <span className="truncate text-xs text-muted-foreground">— {e.note}</span>
+                )}
+                {due && (
+                  <span className={`inline-flex items-center gap-1 text-[11px] ${due.cls}`}>
+                    <CalendarIcon className="h-3 w-3" />
+                    {due.text}
+                  </span>
+                )}
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {new Date(e.entry_date).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })}
+                </span>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() => startEdit(e)}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-destructive hover:text-destructive"
+                  onClick={() => onDeleteEntry(e.id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
+          </div>
+        );
+      })}
       {adding === catId ? (
-        <div className="flex items-center gap-2 rounded-lg border border-primary/40 bg-background/60 px-2 py-1.5">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-background/60 px-2 py-1.5">
           <Input
             autoFocus
             value={amount}
@@ -175,9 +239,18 @@ export function CategoryRow({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Nota (opcional)"
-            className="h-8 flex-1"
+            className="h-8 flex-1 min-w-[120px]"
             onKeyDown={(e) => e.key === "Enter" && handleAdd(catId)}
           />
+          {isExpense && (
+            <Input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="h-8 w-[140px]"
+              title="Data de vencimento"
+            />
+          )}
           <Button size="sm" className="h-8" onClick={() => handleAdd(catId)}>
             Salvar
           </Button>
@@ -189,6 +262,7 @@ export function CategoryRow({
               setAdding(null);
               setAmount("");
               setNote("");
+              setDueDate("");
             }}
           >
             <X className="h-4 w-4" />
@@ -258,7 +332,7 @@ export function CategoryRow({
                 e.stopPropagation();
                 setRecurringFor(category);
               }}
-              title={isPinned ? "Editar valor fixo" : "Fixar todo mês"}
+              title={isPinned ? "Editar conta fixa" : "Marcar como conta fixa"}
             >
               {isPinned ? (
                 <Pin className="h-3.5 w-3.5 fill-current" />
@@ -312,7 +386,7 @@ export function CategoryRow({
                           variant="ghost"
                           className={`h-6 w-6 ${subPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
                           onClick={() => setRecurringFor(sub)}
-                          title={subPinned ? "Editar valor fixo" : "Fixar todo mês"}
+                          title={subPinned ? "Editar conta fixa" : "Marcar como conta fixa"}
                         >
                           {subPinned ? (
                             <Pin className="h-3 w-3 fill-current" />
