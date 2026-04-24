@@ -22,6 +22,7 @@ export type Database = {
           name: string
           parent_id: string | null
           sort_order: number
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -30,6 +31,7 @@ export type Database = {
           name: string
           parent_id?: string | null
           sort_order?: number
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -38,6 +40,7 @@ export type Database = {
           name?: string
           parent_id?: string | null
           sort_order?: number
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -54,33 +57,54 @@ export type Database = {
           amount: number
           category_id: string
           created_at: string
+          due_date: string | null
           entry_date: string
           id: string
           month: number
           note: string | null
+          paid: boolean
+          paid_at: string | null
+          reminder_sent_0d: boolean
+          reminder_sent_1d: boolean
+          reminder_sent_2d: boolean
           updated_at: string
+          user_id: string | null
           year: number
         }
         Insert: {
           amount?: number
           category_id: string
           created_at?: string
+          due_date?: string | null
           entry_date?: string
           id?: string
           month: number
           note?: string | null
+          paid?: boolean
+          paid_at?: string | null
+          reminder_sent_0d?: boolean
+          reminder_sent_1d?: boolean
+          reminder_sent_2d?: boolean
           updated_at?: string
+          user_id?: string | null
           year: number
         }
         Update: {
           amount?: number
           category_id?: string
           created_at?: string
+          due_date?: string | null
           entry_date?: string
           id?: string
           month?: number
           note?: string | null
+          paid?: boolean
+          paid_at?: string | null
+          reminder_sent_0d?: boolean
+          reminder_sent_1d?: boolean
+          reminder_sent_2d?: boolean
           updated_at?: string
+          user_id?: string | null
           year?: number
         }
         Relationships: [
@@ -93,33 +117,72 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          notify_email: boolean
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          notify_email?: boolean
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          notify_email?: boolean
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       recurring_amounts: {
         Row: {
           active: boolean
           amount: number
           category_id: string
           created_at: string
+          due_day: number | null
           id: string
           note: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           active?: boolean
           amount?: number
           category_id: string
           created_at?: string
+          due_day?: number | null
           id?: string
           note?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           active?: boolean
           amount?: number
           category_id?: string
           created_at?: string
+          due_day?: number | null
           id?: string
           note?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -128,7 +191,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      seed_default_categories: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
