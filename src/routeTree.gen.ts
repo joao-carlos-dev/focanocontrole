@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VisaoAnualRouteImport } from './routes/visao-anual'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
 const VisaoAnualRoute = VisaoAnualRouteImport.update({
   id: '/visao-anual',
   path: '/visao-anual',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +37,35 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/perfil': typeof PerfilRoute
   '/visao-anual': typeof VisaoAnualRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/perfil': typeof PerfilRoute
   '/visao-anual': typeof VisaoAnualRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/perfil': typeof PerfilRoute
   '/visao-anual': typeof VisaoAnualRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/visao-anual'
+  fullPaths: '/' | '/auth' | '/perfil' | '/visao-anual'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/visao-anual'
-  id: '__root__' | '/' | '/visao-anual'
+  to: '/' | '/auth' | '/perfil' | '/visao-anual'
+  id: '__root__' | '/' | '/auth' | '/perfil' | '/visao-anual'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  PerfilRoute: typeof PerfilRoute
   VisaoAnualRoute: typeof VisaoAnualRoute
 }
 
@@ -56,6 +76,20 @@ declare module '@tanstack/react-router' {
       path: '/visao-anual'
       fullPath: '/visao-anual'
       preLoaderRoute: typeof VisaoAnualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +104,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  PerfilRoute: PerfilRoute,
   VisaoAnualRoute: VisaoAnualRoute,
 }
 export const routeTree = rootRouteImport
