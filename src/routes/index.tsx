@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Wallet, BarChart3 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Wallet, BarChart3, User as UserIcon, LogOut } from "lucide-react";
 import { useFinance } from "@/hooks/use-finance";
+import { useAuth } from "@/hooks/use-auth";
 import { MonthSelector } from "@/components/finance/MonthSelector";
 import { SummaryCards } from "@/components/finance/SummaryCards";
 import { CategoryChart } from "@/components/finance/CategoryChart";
@@ -27,6 +28,12 @@ function Dashboard() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
+  const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/auth" });
+  }, [user, authLoading, navigate]);
 
   const {
     categories,
@@ -35,6 +42,7 @@ function Dashboard() {
     loading,
     addEntry,
     updateEntry,
+    togglePaid,
     deleteEntry,
     addCategory,
     deleteCategory,
@@ -88,11 +96,14 @@ function Dashboard() {
     recurring,
     onAddEntry: addEntry,
     onUpdateEntry: updateEntry,
+    onTogglePaid: togglePaid,
     onDeleteEntry: deleteEntry,
     onDeleteCategory: deleteCategory,
     onSetRecurring: setRecurringForCategory,
     onRemoveRecurring: removeRecurringForCategory,
   };
+
+  if (authLoading || !user) return null;
 
   return (
     <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
@@ -113,6 +124,23 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Link to="/perfil">
+              <Button variant="ghost" size="icon" className="rounded-xl" title="Perfil">
+                <UserIcon className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-xl"
+              title="Sair"
+              onClick={async () => {
+                await signOut();
+                navigate({ to: "/auth" });
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
             <Link to="/visao-anual">
               <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
                 <BarChart3 className="h-4 w-4" />

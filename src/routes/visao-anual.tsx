@@ -51,6 +51,14 @@ function AnnualView() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  // Auth guard
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { useAuth } = require("@/hooks/use-auth");
+  const { user, loading: authLoading } = useAuth();
+  const navigate = (require("@tanstack/react-router").useNavigate)();
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/auth" });
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     setLoading(true);
