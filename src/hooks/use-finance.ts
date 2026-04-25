@@ -43,6 +43,7 @@ export function useFinance(year: number, month: number) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [recurring, setRecurring] = useState<Recurring[]>([]);
+  const [editorNames, setEditorNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   const loadCategories = useCallback(async () => {
@@ -122,6 +123,23 @@ export function useFinance(year: number, month: number) {
     [year, month, user, activeGroupId],
   );
 
+  const loadEditorNames = useCallback(async (entryList: Entry[], categoryList: Category[]) => {
+    const ids = Array.from(new Set([
+      ...entryList.flatMap((e) => [e.created_by, e.updated_by]),
+      ...categoryList.flatMap((c) => [c.created_by, c.updated_by]),
+    ].filter(Boolean))) as string[];
+    if (ids.length === 0) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, email")
+      .in("user_id", ids);
+    const map: Record<string, string> = {};
+    for (const p of data || []) {
+      map[(p as any).user_id] = (p as any).display_name || (p as any).email || "Usuário";
+    }
+    setEditorNames(map);
+  }, []);
+
   useEffect(() => {
     if (!user) {
       setCategories([]);
@@ -132,15 +150,16 @@ export function useFinance(year: number, month: number) {
     }
     setLoading(true);
     (async () => {
-      const [_, entriesData, recList] = await Promise.all([
+      const [catsData, entriesData, recList] = await Promise.all([
         loadCategories(),
         loadEntries(),
         loadRecurring(),
       ]);
       await applyRecurringIfMissing(recList, entriesData);
+      await loadEditorNames(entriesData as Entry[], (catsData as Category[]) || []);
       setLoading(false);
     })();
-  }, [user, activeGroupId, loadCategories, loadEntries, loadRecurring, applyRecurringIfMissing]);
+  }, [user, activeGroupId, loadCategories, loadEntries, loadRecurring, applyRecurringIfMissing, loadEditorNames]);
 
   const addEntry = async (
     category_id: string,
@@ -336,6 +355,7 @@ export function useFinance(year: number, month: number) {
     categories,
     entries,
     recurring,
+    editorNames,
     loading,
     addEntry,
     updateEntry,
