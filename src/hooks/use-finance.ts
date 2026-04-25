@@ -53,7 +53,7 @@ export function useFinance(year: number, month: number) {
       .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`)
       .order("sort_order", { ascending: true });
     if (data) setCategories(data as Category[]);
-  }, [user]);
+  }, [user, activeGroupId]);
 
   const loadEntries = useCallback(async () => {
     if (!user) return [];
@@ -68,7 +68,7 @@ export function useFinance(year: number, month: number) {
         data.map((d: any) => ({ ...d, amount: Number(d.amount) })) as Entry[],
       );
     return (data || []) as any[];
-  }, [year, month, user]);
+  }, [year, month, user, activeGroupId]);
 
   const loadRecurring = useCallback(async () => {
     if (!user) return [];
@@ -82,7 +82,7 @@ export function useFinance(year: number, month: number) {
     })) as Recurring[];
     setRecurring(list);
     return list;
-  }, [user]);
+  }, [user, activeGroupId]);
 
   const applyRecurringIfMissing = useCallback(
     async (recList: Recurring[], existing: any[]) => {
