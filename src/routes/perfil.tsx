@@ -65,11 +65,15 @@ function PerfilPage() {
   };
 
   const handleCreateGroup = async () => {
+    setBusy(true);
     try {
       await createGroup(groupName);
       toast.success("Grupo familiar criado");
-    } catch {
-      toast.error("Erro ao criar grupo");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao criar grupo";
+      toast.error(message);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -210,7 +214,7 @@ function PerfilPage() {
             {groups.length === 0 ? (
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Input value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Nome do grupo" />
-                <Button onClick={handleCreateGroup}>Criar grupo</Button>
+                <Button onClick={handleCreateGroup} disabled={busy}>{busy ? "Criando..." : "Criar grupo"}</Button>
               </div>
             ) : activeGroupId ? (
               <div className="space-y-3">
