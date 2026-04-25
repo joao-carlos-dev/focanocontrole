@@ -35,7 +35,7 @@ export function AddCategoryDialog({ categories, onAdd }: Props) {
   const [kind, setKind] = useState<"expense" | "savings" | "income">("expense");
   const [parentId, setParentId] = useState<string>("none");
 
-  const parents = categories.filter((c) => !c.parent_id && c.kind === "expense");
+  const parents = categories.filter((c) => !c.parent_id && c.kind === kind);
 
   const submit = async () => {
     if (!name.trim()) return;
@@ -76,12 +76,12 @@ export function AddCategoryDialog({ categories, onAdd }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="expense">Gasto</SelectItem>
-                <SelectItem value="savings">Guardar dinheiro</SelectItem>
+                <SelectItem value="savings">Investimento</SelectItem>
                 <SelectItem value="income">Receita / Salário</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {kind === "expense" && (
+          {kind !== "income" && (
             <div className="space-y-2">
               <Label>Subcategoria de (opcional)</Label>
               <Select value={parentId} onValueChange={setParentId}>
