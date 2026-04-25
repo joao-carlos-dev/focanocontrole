@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { formatBRL } from "@/lib/format";
 import type { Category, Entry, Recurring } from "@/hooks/use-finance";
 import { RecurringDialog } from "./RecurringDialog";
