@@ -183,7 +183,7 @@ function Dashboard() {
                 <CategoryRow
                   key={cat.id}
                   category={cat}
-                  subcategories={[]}
+                  subcategories={categories.filter((c) => c.parent_id === cat.id)}
                   entries={entries}
                   allEntries={entries}
                   {...rowProps}
@@ -234,7 +234,7 @@ function Dashboard() {
               <CategoryRow
                 key={cat.id}
                 category={cat}
-                subcategories={[]}
+                subcategories={categories.filter((c) => c.parent_id === cat.id)}
                 entries={entries}
                 allEntries={entries}
                 {...rowProps}
