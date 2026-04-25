@@ -8,6 +8,10 @@ export type Category = {
   parent_id: string | null;
   kind: "expense" | "savings" | "income";
   sort_order: number;
+  user_id: string | null;
+  group_id: string | null;
+  created_by: string | null;
+  updated_by: string | null;
 };
 
 export type Entry = {
@@ -20,6 +24,8 @@ export type Entry = {
   entry_date: string;
   due_date: string | null;
   paid: boolean;
+  created_by: string | null;
+  updated_by: string | null;
 };
 
 export type Recurring = {
@@ -32,7 +38,8 @@ export type Recurring = {
 };
 
 export function useFinance(year: number, month: number) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const activeGroupId = profile?.active_group_id ?? null;
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [recurring, setRecurring] = useState<Recurring[]>([]);
@@ -43,6 +50,7 @@ export function useFinance(year: number, month: number) {
     const { data } = await supabase
       .from("categories")
       .select("*")
+      .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`)
       .order("sort_order", { ascending: true });
     if (data) setCategories(data as Category[]);
   }, [user]);
@@ -52,6 +60,7 @@ export function useFinance(year: number, month: number) {
     const { data } = await supabase
       .from("entries")
       .select("*")
+      .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`)
       .eq("year", year)
       .eq("month", month);
     if (data)
@@ -63,7 +72,10 @@ export function useFinance(year: number, month: number) {
 
   const loadRecurring = useCallback(async () => {
     if (!user) return [];
-    const { data } = await supabase.from("recurring_amounts").select("*");
+    const { data } = await supabase
+      .from("recurring_amounts")
+      .select("*")
+      .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`);
     const list = (data || []).map((d: any) => ({
       ...d,
       amount: Number(d.amount),
@@ -85,6 +97,9 @@ export function useFinance(year: number, month: number) {
             : null;
           return {
             user_id: user.id,
+            group_id: activeGroupId,
+            created_by: user.id,
+            updated_by: user.id,
             category_id: r.category_id,
             amount: r.amount,
             note: r.note,
@@ -104,7 +119,7 @@ export function useFinance(year: number, month: number) {
         ]);
       }
     },
-    [year, month, user],
+    [year, month, user, activeGroupId],
   );
 
   useEffect(() => {
@@ -125,7 +140,7 @@ export function useFinance(year: number, month: number) {
       await applyRecurringIfMissing(recList, entriesData);
       setLoading(false);
     })();
-  }, [user, loadCategories, loadEntries, loadRecurring, applyRecurringIfMissing]);
+  }, [user, activeGroupId, loadCategories, loadEntries, loadRecurring, applyRecurringIfMissing]);
 
   const addEntry = async (
     category_id: string,
@@ -138,6 +153,9 @@ export function useFinance(year: number, month: number) {
       .from("entries")
       .insert({
         user_id: user.id,
+        group_id: activeGroupId,
+        created_by: user.id,
+        updated_by: user.id,
         category_id,
         amount,
         note: note || null,
@@ -162,7 +180,7 @@ export function useFinance(year: number, month: number) {
     note?: string,
     due_date?: string | null,
   ) => {
-    const update: any = { amount, note: note ?? null };
+    const update: any = { amount, note: note ?? null, updated_by: user?.id ?? null };
     if (due_date !== undefined) update.due_date = due_date || null;
     const { data } = await supabase
       .from("entries")
@@ -183,7 +201,7 @@ export function useFinance(year: number, month: number) {
   const togglePaid = async (id: string, paid: boolean) => {
     const { data } = await supabase
       .from("entries")
-      .update({ paid, paid_at: paid ? new Date().toISOString() : null })
+      .update({ paid, paid_at: paid ? new Date().toISOString() : null, updated_by: user?.id ?? null })
       .eq("id", id)
       .select()
       .single();
@@ -211,7 +229,16 @@ export function useFinance(year: number, month: number) {
     const max = Math.max(0, ...categories.map((c) => c.sort_order));
     const { data } = await supabase
       .from("categories")
-      .insert({ user_id: user.id, name, kind, parent_id, sort_order: max + 1 })
+      .insert({
+        user_id: user.id,
+        group_id: activeGroupId,
+        created_by: user.id,
+        updated_by: user.id,
+        name,
+        kind,
+        parent_id,
+        sort_order: max + 1,
+      })
       .select()
       .single();
     if (data) setCategories((prev) => [...prev, data as Category]);
@@ -243,6 +270,7 @@ export function useFinance(year: number, month: number) {
           note: note ?? null,
           active: true,
           due_day: due_day ?? null,
+          updated_by: user.id,
         })
         .eq("id", existing.id)
         .select()
@@ -260,6 +288,9 @@ export function useFinance(year: number, month: number) {
         .from("recurring_amounts")
         .insert({
           user_id: user.id,
+          group_id: activeGroupId,
+          created_by: user.id,
+          updated_by: user.id,
           category_id,
           amount,
           note: note || null,
@@ -283,7 +314,7 @@ export function useFinance(year: number, month: number) {
       if (existingEntry.due_date !== newDue) {
         await supabase
           .from("entries")
-          .update({ due_date: newDue })
+          .update({ due_date: newDue, updated_by: user.id })
           .eq("id", existingEntry.id);
         setEntries((prev) =>
           prev.map((e) =>
