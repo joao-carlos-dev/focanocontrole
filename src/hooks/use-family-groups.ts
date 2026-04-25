@@ -24,7 +24,12 @@ export function useFamilyGroups() {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setGroups([]);
+      setMembers([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const [{ data: groupData }, { data: memberData }] = await Promise.all([
       supabase.from("family_groups").select("*").order("created_at", { ascending: true }),
@@ -48,6 +53,15 @@ export function useFamilyGroups() {
       .select()
       .single();
     if (error) throw error;
+    await supabase.from("family_group_members").upsert({
+      group_id: data.id,
+      user_id: user.id,
+      invited_email: user.email?.toLowerCase() || `${user.id}@usuario.local`,
+      invited_by: user.id,
+      role: "owner",
+      status: "active",
+      joined_at: new Date().toISOString(),
+    }, { onConflict: "group_id,invited_email" });
     await supabase.from("profiles").update({ active_group_id: data.id }).eq("user_id", user.id);
     await refreshProfile();
     await load();

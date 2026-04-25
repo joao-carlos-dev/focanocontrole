@@ -121,18 +121,17 @@ export function CategoryRow({
     setEditingId(null);
   };
 
-  const dueLabel = (e: Entry): { text: string; cls: string } | null => {
-    if (!e.due_date) return null;
+  const dueLabel = (e: Entry): { text: string; cls: string; rowCls: string; status: string } | null => {
+    if (!e.due_date) return e.paid ? { text: "Pago", cls: "text-primary", rowCls: "border-primary/40 bg-primary/10", status: "Pago" } : null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const due = new Date(e.due_date + "T00:00:00");
     const diffDays = Math.round((due.getTime() - today.getTime()) / 86400000);
     const txt = `Vence ${due.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`;
-    if (e.paid) return { text: txt, cls: "text-muted-foreground" };
-    if (diffDays < 0) return { text: `${txt} • atrasada`, cls: "text-destructive" };
-    if (diffDays === 0) return { text: `${txt} • hoje`, cls: "text-destructive" };
-    if (diffDays <= 2) return { text: `${txt} • em ${diffDays}d`, cls: "text-amber-400" };
-    return { text: txt, cls: "text-muted-foreground" };
+    if (e.paid) return { text: `${txt} • pago`, cls: "text-primary", rowCls: "border-primary/40 bg-primary/10", status: "Pago" };
+    if (diffDays < 0) return { text: `${txt} • atrasada`, cls: "text-destructive", rowCls: "border-destructive/50 bg-destructive/10", status: "Vencida" };
+    if (diffDays === 0) return { text: `${txt} • hoje`, cls: "text-destructive", rowCls: "border-destructive/50 bg-destructive/10", status: "Vence hoje" };
+    return { text: diffDays <= 2 ? `${txt} • em ${diffDays}d` : txt, cls: "text-warning", rowCls: "border-warning/50 bg-warning/10", status: "À vencer" };
   };
 
   const personLabel = (userId?: string | null) => {
@@ -147,7 +146,7 @@ export function CategoryRow({
         return (
           <div
             key={e.id}
-            className={`flex flex-wrap items-center gap-2 rounded-lg bg-background/40 px-3 py-2 text-sm ${e.paid ? "opacity-60" : ""}`}
+            className={`flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm ${due?.rowCls ?? "border-transparent bg-background/40"} ${e.paid ? "opacity-80" : ""}`}
           >
             {editingId === e.id ? (
               <>
@@ -205,8 +204,9 @@ export function CategoryRow({
                   <span className="truncate text-xs text-muted-foreground">— {e.note}</span>
                 )}
                 {due && (
-                  <span className={`inline-flex items-center gap-1 text-[11px] ${due.cls}`}>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${due.cls}`}>
                     <CalendarIcon className="h-3 w-3" />
+                    <span>{due.status}</span>
                     {due.text}
                   </span>
                 )}
@@ -290,7 +290,7 @@ export function CategoryRow({
         <Button
           size="sm"
           variant="ghost"
-          className="h-8 w-full justify-start gap-1.5 text-muted-foreground hover:text-foreground"
+          className="h-8 w-full cursor-pointer justify-start gap-1.5 text-muted-foreground hover:text-foreground"
           onClick={() => setAdding(catId)}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -305,7 +305,7 @@ export function CategoryRow({
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elegant)]">
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+          className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
         >
           <div className={`h-2 w-2 rounded-full ${dotColor}`} />
           {subcategories.length > 0 ? (
@@ -402,7 +402,7 @@ export function CategoryRow({
                         <Button
                           size="icon"
                           variant="ghost"
-                          className={`h-6 w-6 ${subPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
+                          className={`h-6 w-6 cursor-pointer ${subPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
                           onClick={() => setRecurringFor(sub)}
                           title={subPinned ? "Editar conta fixa" : "Marcar como conta fixa"}
                         >
