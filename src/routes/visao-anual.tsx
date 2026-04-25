@@ -52,7 +52,7 @@ function AnnualView() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/auth" });
@@ -61,9 +61,13 @@ function AnnualView() {
   useEffect(() => {
     setLoading(true);
     (async () => {
+      if (!user) return;
+      const scope = profile?.active_group_id
+        ? `group_id.eq.${profile.active_group_id}`
+        : `and(user_id.eq.${user.id},group_id.is.null)`;
       const [catsRes, entriesRes] = await Promise.all([
-        supabase.from("categories").select("*").order("sort_order"),
-        supabase.from("entries").select("*").eq("year", year),
+        supabase.from("categories").select("*").or(scope).order("sort_order"),
+        supabase.from("entries").select("*").or(scope).eq("year", year),
       ]);
       if (catsRes.data) setCategories(catsRes.data as Category[]);
       if (entriesRes.data)
@@ -75,7 +79,7 @@ function AnnualView() {
         );
       setLoading(false);
     })();
-  }, [year]);
+  }, [year, user, profile?.active_group_id]);
 
   const { monthly, totals, byCategoryMonthly, topCats } = useMemo(() => {
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
