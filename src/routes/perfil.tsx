@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, LogOut, User as UserIcon } from "lucide-react";
+import { ArrowLeft, LogOut, User as UserIcon, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useFamilyGroups } from "@/hooks/use-family-groups";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/perfil")({
@@ -22,7 +24,11 @@ function PerfilPage() {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [notifyEmail, setNotifyEmail] = useState(true);
+  const [monthlyCsvEmail, setMonthlyCsvEmail] = useState(true);
+  const [groupName, setGroupName] = useState("Família");
+  const [inviteEmail, setInviteEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const { groups, members, activeGroupId, createGroup, inviteMember, switchGroup } = useFamilyGroups();
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
@@ -33,6 +39,7 @@ function PerfilPage() {
       setName(profile.display_name || "");
       setWhatsapp(profile.whatsapp || "");
       setNotifyEmail(profile.notify_email);
+      setMonthlyCsvEmail(profile.monthly_csv_email);
     }
   }, [profile]);
 
@@ -41,7 +48,12 @@ function PerfilPage() {
     setBusy(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ display_name: name, whatsapp: whatsapp || null, notify_email: notifyEmail })
+      .update({
+        display_name: name,
+        whatsapp: whatsapp || null,
+        notify_email: notifyEmail,
+        monthly_csv_email: monthlyCsvEmail,
+      })
       .eq("user_id", user.id);
     setBusy(false);
     if (error) {
@@ -50,6 +62,26 @@ function PerfilPage() {
     }
     await refreshProfile();
     toast.success("Perfil atualizado");
+  };
+
+  const handleCreateGroup = async () => {
+    try {
+      await createGroup(groupName);
+      toast.success("Grupo familiar criado");
+    } catch {
+      toast.error("Erro ao criar grupo");
+    }
+  };
+
+  const handleInvite = async () => {
+    if (!activeGroupId || !inviteEmail.trim()) return;
+    try {
+      await inviteMember(activeGroupId, inviteEmail);
+      setInviteEmail("");
+      toast.success("Convite cadastrado");
+    } catch {
+      toast.error("Erro ao convidar");
+    }
   };
 
   const handleSignOut = async () => {
@@ -110,9 +142,69 @@ function PerfilPage() {
               </div>
               <Switch checked={notifyEmail} onCheckedChange={setNotifyEmail} />
             </div>
+            <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3">
+              <div>
+                <Label className="text-sm">Receber CSV mensal por email</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Envio automático no último dia de cada mês às 17h.
+                </p>
+              </div>
+              <Switch checked={monthlyCsvEmail} onCheckedChange={setMonthlyCsvEmail} />
+            </div>
             <Button onClick={save} disabled={busy} className="w-full">
               {busy ? "Salvando..." : "Salvar alterações"}
             </Button>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-elegant)]">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary">
+              <Users className="h-5 w-5 text-secondary-foreground" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Gastos em família</h2>
+              <p className="text-xs text-muted-foreground">Compartilhe visualização e edição dos lançamentos.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Área ativa</Label>
+              <Select value={activeGroupId ?? "personal"} onValueChange={(v) => switchGroup(v === "personal" ? null : v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="personal">Somente meus dados</SelectItem>
+                  {groups.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {groups.length === 0 ? (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Nome do grupo" />
+                <Button onClick={handleCreateGroup}>Criar grupo</Button>
+              </div>
+            ) : activeGroupId ? (
+              <div className="space-y-3">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="email@exemplo.com" />
+                  <Button onClick={handleInvite}>Convidar</Button>
+                </div>
+                <div className="space-y-1 rounded-xl border border-border bg-background/40 p-3 text-sm">
+                  {members.filter((m) => m.group_id === activeGroupId).map((m) => (
+                    <div key={m.id} className="flex items-center justify-between gap-3 text-xs">
+                      <span className="truncate">{m.invited_email}</span>
+                      <span className="text-muted-foreground">{m.status === "active" ? "ativo" : "pendente"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
