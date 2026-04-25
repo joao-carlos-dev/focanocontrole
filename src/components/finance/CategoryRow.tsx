@@ -10,10 +10,10 @@ import {
   Pin,
   PinOff,
   Calendar as CalendarIcon,
+  CircleCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { formatBRL } from "@/lib/format";
 import type { Category, Entry, Recurring } from "@/hooks/use-finance";
 import { RecurringDialog } from "./RecurringDialog";
@@ -186,11 +186,17 @@ export function CategoryRow({
             ) : (
               <>
                 {isExpense && (
-                  <Checkbox
-                    checked={e.paid}
-                    onCheckedChange={(v) => onTogglePaid(e.id, !!v)}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={e.paid ? "secondary" : "outline"}
+                    className="h-7 shrink-0 gap-1 px-2 text-xs"
+                    onClick={() => onTogglePaid(e.id, !e.paid)}
                     title={e.paid ? "Marcar como não paga" : "Marcar como paga"}
-                  />
+                  >
+                    {e.paid ? <CircleCheck className="h-3.5 w-3.5" /> : null}
+                    {e.paid ? "Pago" : "Paguei"}
+                  </Button>
                 )}
                 <span className={`font-medium ${e.paid ? "line-through" : ""}`}>
                   {formatBRL(e.amount)}
