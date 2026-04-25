@@ -39,6 +39,7 @@ function Dashboard() {
     categories,
     entries,
     recurring,
+    editorNames,
     loading,
     addEntry,
     updateEntry,
@@ -94,6 +95,7 @@ function Dashboard() {
 
   const rowProps = {
     recurring,
+    profileNames: editorNames,
     onAddEntry: addEntry,
     onUpdateEntry: updateEntry,
     onTogglePaid: togglePaid,
@@ -224,8 +226,8 @@ function Dashboard() {
 
         {/* Savings */}
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-savings">
-            Guardar dinheiro
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-savings">
+            Investimentos
           </h2>
           <div className="space-y-2.5">
             {savings.map((cat) => (
