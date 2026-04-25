@@ -290,7 +290,7 @@ export function CategoryRow({
         <Button
           size="sm"
           variant="ghost"
-          className="h-8 w-full justify-start gap-1.5 text-muted-foreground hover:text-foreground"
+          className="h-8 w-full cursor-pointer justify-start gap-1.5 text-muted-foreground hover:text-foreground"
           onClick={() => setAdding(catId)}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -305,7 +305,7 @@ export function CategoryRow({
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elegant)]">
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+          className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
         >
           <div className={`h-2 w-2 rounded-full ${dotColor}`} />
           {subcategories.length > 0 ? (
@@ -402,7 +402,7 @@ export function CategoryRow({
                         <Button
                           size="icon"
                           variant="ghost"
-                          className={`h-6 w-6 ${subPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
+                          className={`h-6 w-6 cursor-pointer ${subPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
                           onClick={() => setRecurringFor(sub)}
                           title={subPinned ? "Editar conta fixa" : "Marcar como conta fixa"}
                         >
