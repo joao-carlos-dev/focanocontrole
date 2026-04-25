@@ -9,6 +9,8 @@ type Profile = {
   email: string | null;
   whatsapp: string | null;
   notify_email: boolean;
+  monthly_csv_email: boolean;
+  active_group_id: string | null;
 };
 
 type AuthContextValue = {

@@ -46,6 +46,7 @@ interface Props {
     due_day?: number | null,
   ) => Promise<void>;
   onRemoveRecurring: (categoryId: string) => Promise<void>;
+  profileNames?: Record<string, string>;
 }
 
 export function CategoryRow({
@@ -61,6 +62,7 @@ export function CategoryRow({
   onDeleteCategory,
   onSetRecurring,
   onRemoveRecurring,
+  profileNames = {},
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
@@ -133,6 +135,11 @@ export function CategoryRow({
     return { text: txt, cls: "text-muted-foreground" };
   };
 
+  const personLabel = (userId?: string | null) => {
+    if (!userId) return null;
+    return profileNames[userId] ?? "Usuário";
+  };
+
   const renderEntries = (catId: string, list: Entry[]) => (
     <div className="space-y-1.5">
       {list.map((e) => {
@@ -195,6 +202,11 @@ export function CategoryRow({
                   <span className={`inline-flex items-center gap-1 text-[11px] ${due.cls}`}>
                     <CalendarIcon className="h-3 w-3" />
                     {due.text}
+                  </span>
+                )}
+                {personLabel(e.updated_by || e.created_by) && (
+                  <span className="text-[11px] text-muted-foreground">
+                    Editado por {personLabel(e.updated_by || e.created_by)}
                   </span>
                 )}
                 <span className="ml-auto text-xs text-muted-foreground">
