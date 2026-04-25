@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, LogOut, User as UserIcon, Users } from "lucide-react";
+import { ArrowLeft, LogOut, Trash2, User as UserIcon, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useFamilyGroups } from "@/hooks/use-family-groups";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/perfil")({
 });
 
 function PerfilPage() {
-  const { user, profile, loading, refreshProfile, signOut } = useAuth();
+  const { session, user, profile, loading, refreshProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -86,6 +86,29 @@ function PerfilPage() {
 
   const handleSignOut = async () => {
     await signOut();
+    navigate({ to: "/auth" });
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!session) return;
+    const confirmation = prompt(
+      "Esta ação exclui sua conta e seus dados. Digite EXCLUIR para confirmar.",
+    );
+    if (confirmation !== "EXCLUIR") return;
+
+    setBusy(true);
+    const { error } = await supabase.functions.invoke("delete-account", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    setBusy(false);
+
+    if (error) {
+      toast.error("Erro ao excluir conta");
+      return;
+    }
+
+    await signOut();
+    toast.success("Conta excluída");
     navigate({ to: "/auth" });
   };
 
@@ -206,6 +229,29 @@ function PerfilPage() {
               </div>
             ) : null}
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-destructive/30 bg-card p-6 shadow-[var(--shadow-elegant)]">
+          <div className="mb-4 flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-destructive/10">
+              <Trash2 className="h-5 w-5 text-destructive" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-destructive">Excluir conta</h2>
+              <p className="text-xs text-muted-foreground">
+                Remove seu acesso, perfil e lançamentos pessoais. Esta ação não pode ser desfeita.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteAccount}
+            disabled={busy}
+            className="w-full gap-1.5"
+          >
+            <Trash2 className="h-4 w-4" />
+            Excluir minha conta
+          </Button>
         </div>
       </div>
     </div>
