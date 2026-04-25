@@ -54,6 +54,7 @@ export function useFinance(year: number, month: number) {
       .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`)
       .order("sort_order", { ascending: true });
     if (data) setCategories(data as Category[]);
+    return (data || []) as Category[];
   }, [user, activeGroupId]);
 
   const loadEntries = useCallback(async () => {
