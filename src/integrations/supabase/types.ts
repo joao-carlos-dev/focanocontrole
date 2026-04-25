@@ -17,29 +17,38 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
+          created_by: string | null
+          group_id: string | null
           id: string
           kind: string
           name: string
           parent_id: string | null
           sort_order: number
+          updated_by: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
+          group_id?: string | null
           id?: string
           kind?: string
           name: string
           parent_id?: string | null
           sort_order?: number
+          updated_by?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
+          created_by?: string | null
+          group_id?: string | null
           id?: string
           kind?: string
           name?: string
           parent_id?: string | null
           sort_order?: number
+          updated_by?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -57,8 +66,10 @@ export type Database = {
           amount: number
           category_id: string
           created_at: string
+          created_by: string | null
           due_date: string | null
           entry_date: string
+          group_id: string | null
           id: string
           month: number
           note: string | null
@@ -68,6 +79,7 @@ export type Database = {
           reminder_sent_1d: boolean
           reminder_sent_2d: boolean
           updated_at: string
+          updated_by: string | null
           user_id: string | null
           year: number
         }
@@ -75,8 +87,10 @@ export type Database = {
           amount?: number
           category_id: string
           created_at?: string
+          created_by?: string | null
           due_date?: string | null
           entry_date?: string
+          group_id?: string | null
           id?: string
           month: number
           note?: string | null
@@ -86,6 +100,7 @@ export type Database = {
           reminder_sent_1d?: boolean
           reminder_sent_2d?: boolean
           updated_at?: string
+          updated_by?: string | null
           user_id?: string | null
           year: number
         }
@@ -93,8 +108,10 @@ export type Database = {
           amount?: number
           category_id?: string
           created_at?: string
+          created_by?: string | null
           due_date?: string | null
           entry_date?: string
+          group_id?: string | null
           id?: string
           month?: number
           note?: string | null
@@ -104,6 +121,7 @@ export type Database = {
           reminder_sent_1d?: boolean
           reminder_sent_2d?: boolean
           updated_at?: string
+          updated_by?: string | null
           user_id?: string | null
           year?: number
         }
@@ -117,32 +135,142 @@ export type Database = {
           },
         ]
       }
+      family_group_members: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          invited_by: string
+          invited_email: string
+          joined_at: string | null
+          role: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          invited_by: string
+          invited_email: string
+          joined_at?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+          joined_at?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "family_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      monthly_report_sends: {
+        Row: {
+          created_at: string
+          group_id: string | null
+          id: string
+          recipient_email: string
+          report_month: number
+          report_year: number
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          recipient_email: string
+          report_month: number
+          report_year: number
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          recipient_email?: string
+          report_month?: number
+          report_year?: number
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          active_group_id: string | null
           created_at: string
           display_name: string | null
           email: string | null
           id: string
+          monthly_csv_email: boolean
           notify_email: boolean
           updated_at: string
           user_id: string
           whatsapp: string | null
         }
         Insert: {
+          active_group_id?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          monthly_csv_email?: boolean
           notify_email?: boolean
           updated_at?: string
           user_id: string
           whatsapp?: string | null
         }
         Update: {
+          active_group_id?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          monthly_csv_email?: boolean
           notify_email?: boolean
           updated_at?: string
           user_id?: string
@@ -156,10 +284,13 @@ export type Database = {
           amount: number
           category_id: string
           created_at: string
+          created_by: string | null
           due_day: number | null
+          group_id: string | null
           id: string
           note: string | null
           updated_at: string
+          updated_by: string | null
           user_id: string | null
         }
         Insert: {
@@ -167,10 +298,13 @@ export type Database = {
           amount?: number
           category_id: string
           created_at?: string
+          created_by?: string | null
           due_day?: number | null
+          group_id?: string | null
           id?: string
           note?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id?: string | null
         }
         Update: {
@@ -178,10 +312,13 @@ export type Database = {
           amount?: number
           category_id?: string
           created_at?: string
+          created_by?: string | null
           due_day?: number | null
+          group_id?: string | null
           id?: string
           note?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -191,6 +328,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_email: { Args: never; Returns: string }
+      is_group_member: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
       seed_default_categories: {
         Args: { _user_id: string }
         Returns: undefined
