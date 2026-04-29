@@ -36,6 +36,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    const closeSessionOnlyLogin = () => {
+      if (sessionStorage.getItem("finance-session-only") === "true") {
+        supabase.auth.signOut();
+        sessionStorage.removeItem("finance-session-only");
+      }
+    };
+
+    window.addEventListener("pagehide", closeSessionOnlyLogin);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
       setUser(sess?.user ?? null);
@@ -53,7 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      window.removeEventListener("pagehide", closeSessionOnlyLogin);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
