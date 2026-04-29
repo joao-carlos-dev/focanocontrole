@@ -97,6 +97,35 @@ export function CategoryRow({
     recurring.find((r) => r.category_id === catId);
   const isPinned = !!recurringForCat(category.id);
 
+  const getEntryStatus = (e: Entry): "paid" | "overdue" | "upcoming" | null => {
+    if (e.paid) return "paid";
+    if (!e.due_date) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(e.due_date + "T00:00:00");
+    return due.getTime() < today.getTime() ? "overdue" : "upcoming";
+  };
+
+  const expenseEntries = [...directEntries, ...subEntries];
+  const categoryStatus = isExpense
+    ? expenseEntries.some((e) => getEntryStatus(e) === "overdue")
+      ? "overdue"
+      : expenseEntries.length > 0 && expenseEntries.every((e) => getEntryStatus(e) === "paid")
+        ? "paid"
+        : expenseEntries.some((e) => getEntryStatus(e) === "upcoming")
+          ? "upcoming"
+          : null
+    : null;
+
+  const statusHeaderClass =
+    categoryStatus === "paid"
+      ? "border-primary/50 bg-primary/10"
+      : categoryStatus === "overdue"
+        ? "border-destructive/60 bg-destructive/10"
+        : categoryStatus === "upcoming"
+          ? "border-warning/60 bg-warning/10"
+          : "border-border bg-card";
+
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
     if (isNaN(v) || v <= 0) return;
@@ -302,7 +331,7 @@ export function CategoryRow({
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elegant)]">
+      <div className={`overflow-hidden rounded-2xl border shadow-[var(--shadow-elegant)] ${statusHeaderClass}`}>
         <button
           onClick={() => setExpanded((v) => !v)}
           className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
