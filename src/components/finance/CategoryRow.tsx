@@ -76,25 +76,17 @@ export function CategoryRow({
   const [recurringFor, setRecurringFor] = useState<Category | null>(null);
 
   const directEntries = entries.filter((e) => e.category_id === category.id);
-  const subEntries = subcategories.flatMap((s) =>
-    allEntries.filter((e) => e.category_id === s.id),
-  );
+  const subEntries = subcategories.flatMap((s) => allEntries.filter((e) => e.category_id === s.id));
   const total =
-    directEntries.reduce((s, e) => s + e.amount, 0) +
-    subEntries.reduce((s, e) => s + e.amount, 0);
+    directEntries.reduce((s, e) => s + e.amount, 0) + subEntries.reduce((s, e) => s + e.amount, 0);
 
   const isSavings = category.kind === "savings";
   const isIncome = category.kind === "income";
   const isExpense = !isSavings && !isIncome;
-  const accentColor = isIncome
-    ? "text-income"
-    : isSavings
-      ? "text-savings"
-      : "text-foreground";
+  const accentColor = isIncome ? "text-income" : isSavings ? "text-savings" : "text-foreground";
   const dotColor = isIncome ? "bg-income" : isSavings ? "bg-savings" : "bg-primary";
 
-  const recurringForCat = (catId: string) =>
-    recurring.find((r) => r.category_id === catId);
+  const recurringForCat = (catId: string) => recurring.find((r) => r.category_id === catId);
   const isPinned = !!recurringForCat(category.id);
 
   const getEntryStatus = (e: Entry): "paid" | "overdue" | "upcoming" | null => {
@@ -158,17 +150,50 @@ export function CategoryRow({
     setEditingId(null);
   };
 
-  const dueLabel = (e: Entry): { text: string; cls: string; rowCls: string; status: string } | null => {
-    if (!e.due_date) return e.paid ? { text: "Pago", cls: "text-primary", rowCls: "border-primary/40 bg-primary/10", status: "Pago" } : null;
+  const dueLabel = (
+    e: Entry,
+  ): { text: string; cls: string; rowCls: string; status: string } | null => {
+    if (!e.due_date)
+      return e.paid
+        ? {
+            text: "Pago",
+            cls: "text-primary",
+            rowCls: "border-primary/40 bg-primary/10",
+            status: "Pago",
+          }
+        : null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const due = new Date(e.due_date + "T00:00:00");
     const diffDays = Math.round((due.getTime() - today.getTime()) / 86400000);
     const txt = `Vence ${due.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`;
-    if (e.paid) return { text: `${txt} • pago`, cls: "text-primary", rowCls: "border-primary/40 bg-primary/10", status: "Pago" };
-    if (diffDays < 0) return { text: `${txt} • atrasada`, cls: "text-destructive", rowCls: "border-destructive/50 bg-destructive/10", status: "Vencida" };
-    if (diffDays === 0) return { text: `${txt} • hoje`, cls: "text-destructive", rowCls: "border-destructive/50 bg-destructive/10", status: "Vence hoje" };
-    return { text: diffDays <= 2 ? `${txt} • em ${diffDays}d` : txt, cls: "text-warning", rowCls: "border-warning/50 bg-warning/10", status: "À vencer" };
+    if (e.paid)
+      return {
+        text: `${txt} • pago`,
+        cls: "text-primary",
+        rowCls: "border-primary/40 bg-primary/10",
+        status: "Pago",
+      };
+    if (diffDays < 0)
+      return {
+        text: `${txt} • atrasada`,
+        cls: "text-destructive",
+        rowCls: "border-destructive/50 bg-destructive/10",
+        status: "Vencida",
+      };
+    if (diffDays === 0)
+      return {
+        text: `${txt} • hoje`,
+        cls: "text-destructive",
+        rowCls: "border-destructive/50 bg-destructive/10",
+        status: "Vence hoje",
+      };
+    return {
+      text: diffDays <= 2 ? `${txt} • em ${diffDays}d` : txt,
+      cls: "text-warning",
+      rowCls: "border-warning/50 bg-warning/10",
+      status: "À vencer",
+    };
   };
 
   const personLabel = (userId?: string | null) => {
@@ -207,7 +232,12 @@ export function CategoryRow({
                     className="h-8 w-[140px]"
                   />
                 )}
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => saveEdit(e.id)}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  onClick={() => saveEdit(e.id)}
+                >
                   <Check className="h-4 w-4 text-primary" />
                 </Button>
                 <Button
@@ -241,7 +271,9 @@ export function CategoryRow({
                   <span className="truncate text-xs text-muted-foreground">— {e.note}</span>
                 )}
                 {due && (
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${due.cls}`}>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${due.cls}`}
+                  >
                     <CalendarIcon className="h-3 w-3" />
                     <span>{due.status}</span>
                     {due.text}
@@ -339,7 +371,9 @@ export function CategoryRow({
 
   return (
     <>
-      <div className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}>
+      <div
+        className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}
+      >
         <button
           onClick={() => setExpanded((v) => !v)}
           className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 ${statusHeaderClass}`}
@@ -356,9 +390,7 @@ export function CategoryRow({
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="truncate font-semibold tracking-tight">
-                {category.name}
-              </span>
+              <span className="truncate font-semibold tracking-tight">{category.name}</span>
               {isPinned && (
                 <span
                   title="Conta fixa mensal"
@@ -423,16 +455,11 @@ export function CategoryRow({
                   const subTotal = subList.reduce((s, e) => s + e.amount, 0);
                   const subPinned = !!recurringForCat(sub.id);
                   return (
-                    <div
-                      key={sub.id}
-                      className="rounded-xl border border-border/60 bg-card/60 p-3"
-                    >
+                    <div key={sub.id} className="rounded-xl border border-border/60 bg-card/60 p-3">
                       <div className="mb-2 flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                         <span className="text-sm font-medium">{sub.name}</span>
-                        {subPinned && (
-                          <Pin className="h-3 w-3 fill-current text-primary" />
-                        )}
+                        {subPinned && <Pin className="h-3 w-3 fill-current text-primary" />}
                         <span className="ml-auto text-sm font-semibold tabular-nums">
                           {formatBRL(subTotal)}
                         </span>

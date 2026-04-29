@@ -55,14 +55,29 @@ function ResetPasswordPage() {
           <p className="text-sm text-muted-foreground">Digite sua nova senha de acesso</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-elegant)]">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-elegant)]"
+        >
           <div className="space-y-2">
             <Label>Nova senha</Label>
-            <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label>Confirmar senha</Label>
-            <Input type="password" required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <Input
+              type="password"
+              required
+              minLength={6}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
           </div>
           <Button type="submit" disabled={busy} className="w-full">
             {busy ? "Salvando..." : "Salvar nova senha"}

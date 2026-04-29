@@ -42,7 +42,9 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) {
-      toast.error(error.message === "Invalid login credentials" ? "Email ou senha inválidos" : error.message);
+      toast.error(
+        error.message === "Invalid login credentials" ? "Email ou senha inválidos" : error.message,
+      );
       return;
     }
     if (!rememberMe) sessionStorage.setItem("finance-session-only", "true");
@@ -130,11 +132,21 @@ function AuthPage() {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Senha</Label>
-                  <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <label className="flex cursor-pointer items-center gap-2 text-muted-foreground">
@@ -165,11 +177,21 @@ function AuthPage() {
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Nome</Label>
-                  <Input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" />
+                  <Input
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Seu nome"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>WhatsApp (opcional)</Label>
@@ -210,7 +232,13 @@ function AuthPage() {
             </div>
           </div>
 
-          <Button variant="outline" type="button" onClick={handleGoogle} disabled={busy} className="w-full gap-2">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={handleGoogle}
+            disabled={busy}
+            className="w-full gap-2"
+          >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
                 fill="currentColor"

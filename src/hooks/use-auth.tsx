@@ -45,7 +45,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener("pagehide", closeSessionOnlyLogin);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
