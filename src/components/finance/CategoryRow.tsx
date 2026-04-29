@@ -117,14 +117,22 @@ export function CategoryRow({
           : null
     : null;
 
+  const statusCardClass =
+    categoryStatus === "paid"
+      ? "border-primary/50"
+      : categoryStatus === "overdue"
+        ? "border-destructive/60"
+        : categoryStatus === "upcoming"
+          ? "border-warning/60"
+          : "border-border";
   const statusHeaderClass =
     categoryStatus === "paid"
-      ? "border-primary/50 bg-primary/10"
+      ? "bg-primary/10"
       : categoryStatus === "overdue"
-        ? "border-destructive/60 bg-destructive/10"
+        ? "bg-destructive/10"
         : categoryStatus === "upcoming"
-          ? "border-warning/60 bg-warning/10"
-          : "border-border bg-card";
+          ? "bg-warning/10"
+          : "";
 
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
@@ -331,10 +339,10 @@ export function CategoryRow({
 
   return (
     <>
-      <div className={`overflow-hidden rounded-2xl border shadow-[var(--shadow-elegant)] ${statusHeaderClass}`}>
+      <div className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}>
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+          className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 ${statusHeaderClass}`}
         >
           <div className={`h-2 w-2 rounded-full ${dotColor}`} />
           {subcategories.length > 0 ? (
