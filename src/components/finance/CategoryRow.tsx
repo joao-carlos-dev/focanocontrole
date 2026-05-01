@@ -284,16 +284,10 @@ export function CategoryRow({
                     Editado por {personLabel(e.updated_by || e.created_by)}
                   </span>
                 )}
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {new Date(e.entry_date).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                  })}
-                </span>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-7 w-7"
+                  className="ml-auto h-7 w-7"
                   onClick={() => startEdit(e)}
                 >
                   <Pencil className="h-3.5 w-3.5" />
