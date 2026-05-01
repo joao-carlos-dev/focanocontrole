@@ -439,6 +439,14 @@ export function CategoryRow({
               <div className="text-[10px] uppercase tracking-wider text-income">Receita</div>
             )}
           </div>
+          {headerDueInfo && (
+            <span
+              className={`hidden sm:inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${headerDueInfo.cls}`}
+            >
+              <CalendarIcon className="h-3 w-3" />
+              {headerDueInfo.text}
+            </span>
+          )}
           <div className={`text-base font-bold tabular-nums ${accentColor}`}>
             {formatBRL(total)}
           </div>
