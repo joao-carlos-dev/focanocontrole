@@ -126,6 +126,44 @@ export function CategoryRow({
           ? "bg-warning/10"
           : "";
 
+  const formatDueShort = (iso: string) =>
+    new Date(iso + "T00:00:00").toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+
+  const headerDueInfo: { text: string; cls: string } | null = (() => {
+    if (!isExpense) return null;
+    const withDue = expenseEntries.filter((e) => e.due_date);
+    if (withDue.length === 0) return null;
+    const overdue = withDue
+      .filter((e) => !e.paid && getEntryStatus(e) === "overdue")
+      .sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1));
+    if (overdue.length > 0) {
+      return {
+        text: `Vencida ${formatDueShort(overdue[0].due_date!)}`,
+        cls: "border-destructive/50 bg-destructive/15 text-destructive",
+      };
+    }
+    const upcoming = withDue
+      .filter((e) => !e.paid && getEntryStatus(e) === "upcoming")
+      .sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1));
+    if (upcoming.length > 0) {
+      return {
+        text: `Vence ${formatDueShort(upcoming[0].due_date!)}`,
+        cls: "border-warning/50 bg-warning/15 text-warning",
+      };
+    }
+    const allPaid = withDue.every((e) => e.paid);
+    if (allPaid) {
+      return {
+        text: "Pago",
+        cls: "border-primary/50 bg-primary/15 text-primary",
+      };
+    }
+    return null;
+  })();
+
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
     if (isNaN(v) || v <= 0) return;
