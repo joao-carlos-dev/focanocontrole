@@ -37,6 +37,11 @@ export type Recurring = {
   due_day: number | null;
 };
 
+const DELETED_MONTH_ENTRY_MARKER = "__deleted_month_entry__";
+
+const isDeletedMonthEntry = (entry: any) =>
+  entry?.note === DELETED_MONTH_ENTRY_MARKER && Number(entry?.amount) === 0;
+
 export function useFinance(year: number, month: number) {
   const { user, profile } = useAuth();
   const activeGroupId = profile?.active_group_id ?? null;
@@ -65,9 +70,10 @@ export function useFinance(year: number, month: number) {
       .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`)
       .eq("year", year)
       .eq("month", month);
+    const visible = (data || []).filter((d: any) => !isDeletedMonthEntry(d));
     if (data)
       setEntries(
-        data.map((d: any) => ({ ...d, amount: Number(d.amount) })) as Entry[],
+        visible.map((d: any) => ({ ...d, amount: Number(d.amount) })) as Entry[],
       );
     return (data || []) as any[];
   }, [year, month, user, activeGroupId]);
@@ -89,12 +95,9 @@ export function useFinance(year: number, month: number) {
   const applyRecurringIfMissing = useCallback(
     async (recList: Recurring[], existing: any[]) => {
       if (!user) return;
-      // Only auto-create recurring entries when the month is completely empty.
-      // If the user has deleted entries in this month, respect that and don't
-      // re-insert them on the next visit.
-      if (existing.length > 0) return;
+      const existingCategoryIds = new Set(existing.map((e) => e.category_id));
       const toInsert = recList
-        .filter((r) => r.active)
+        .filter((r) => r.active && !existingCategoryIds.has(r.category_id))
         .map((r) => {
           const day = r.due_day && r.due_day >= 1 && r.due_day <= 28 ? r.due_day : null;
           const due = day
