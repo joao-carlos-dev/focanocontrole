@@ -89,9 +89,12 @@ export function useFinance(year: number, month: number) {
   const applyRecurringIfMissing = useCallback(
     async (recList: Recurring[], existing: any[]) => {
       if (!user) return;
-      const existingByCat = new Set(existing.map((e) => e.category_id));
+      // Only auto-create recurring entries when the month is completely empty.
+      // If the user has deleted entries in this month, respect that and don't
+      // re-insert them on the next visit.
+      if (existing.length > 0) return;
       const toInsert = recList
-        .filter((r) => r.active && !existingByCat.has(r.category_id))
+        .filter((r) => r.active)
         .map((r) => {
           const day = r.due_day && r.due_day >= 1 && r.due_day <= 28 ? r.due_day : null;
           const due = day

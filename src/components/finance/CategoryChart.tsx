@@ -87,6 +87,8 @@ export function CategoryChart({ categories, entries }: Props) {
                   borderRadius: "0.75rem",
                   color: "var(--popover-foreground)",
                 }}
+                labelStyle={{ color: "var(--popover-foreground)" }}
+                itemStyle={{ color: "var(--popover-foreground)" }}
                 formatter={(v) => formatBRL(Number(v))}
               />
             </PieChart>
@@ -110,11 +112,15 @@ export function CategoryChart({ categories, entries }: Props) {
               />
               <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
               <Tooltip
+                cursor={{ fill: "var(--muted)", opacity: 0.2 }}
                 contentStyle={{
                   background: "var(--popover)",
                   border: "1px solid var(--border)",
                   borderRadius: "0.75rem",
+                  color: "var(--popover-foreground)",
                 }}
+                labelStyle={{ color: "var(--popover-foreground)" }}
+                itemStyle={{ color: "var(--popover-foreground)" }}
                 formatter={(v) => formatBRL(Number(v))}
               />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
