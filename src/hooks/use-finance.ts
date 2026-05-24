@@ -212,11 +212,19 @@ export function useFinance(year: number, month: number) {
       })
       .select()
       .single();
-    if (data)
+    if (data) {
+      // Clear any previous "skip this recurring for this month" flag.
+      const skipped = readSkipped();
+      const k = skipKey(scopeKey, category_id, year, month);
+      if (skipped[k]) {
+        delete skipped[k];
+        writeSkipped(skipped);
+      }
       setEntries((prev) => [
         ...prev,
         { ...(data as any), amount: Number((data as any).amount) },
       ]);
+    }
   };
 
   const updateEntry = async (
