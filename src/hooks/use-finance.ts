@@ -264,29 +264,23 @@ export function useFinance(year: number, month: number) {
     const entry = entries.find((e) => e.id === id);
     if (!entry) return;
 
+    // Hard delete the single row for this specific month only.
+    await supabase
+      .from("entries")
+      .delete()
+      .eq("id", id)
+      .eq("year", entry.year)
+      .eq("month", entry.month);
+
+    // If this category has a recurring template, remember that the user
+    // chose to skip it for this month so we don't auto-recreate it.
     const isRecurringEntry = recurring.some((r) => r.category_id === entry.category_id);
     if (isRecurringEntry) {
-      await supabase
-        .from("entries")
-        .update({
-          amount: 0,
-          note: DELETED_MONTH_ENTRY_MARKER,
-          due_date: null,
-          paid: false,
-          paid_at: null,
-          updated_by: user?.id ?? null,
-        })
-        .eq("id", id)
-        .eq("year", entry.year)
-        .eq("month", entry.month);
-    } else {
-      await supabase
-        .from("entries")
-        .delete()
-        .eq("id", id)
-        .eq("year", entry.year)
-        .eq("month", entry.month);
+      const skipped = readSkipped();
+      skipped[skipKey(scopeKey, entry.category_id, entry.year, entry.month)] = true;
+      writeSkipped(skipped);
     }
+
     setEntries((prev) => prev.filter((e) => e.id !== id));
   };
 
