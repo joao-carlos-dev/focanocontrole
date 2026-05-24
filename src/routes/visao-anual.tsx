@@ -7,6 +7,7 @@ import {
   TrendingDown,
   PiggyBank,
   Wallet,
+  Download,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -223,18 +224,66 @@ function AnnualView() {
               </p>
             </div>
           </div>
-          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger className="w-32 rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {yearOptions.map((y) => (
-                <SelectItem key={y} value={String(y)}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl gap-1.5"
+              onClick={() => {
+                const header = ["Mês", "Receitas", "Gastos", "Poupado", "Saldo"];
+                const rows = monthly.map((m) => [
+                  MONTHS_PT[m.month - 1],
+                  m.Receitas.toFixed(2).replace(".", ","),
+                  m.Gastos.toFixed(2).replace(".", ","),
+                  m.Poupado.toFixed(2).replace(".", ","),
+                  m.Saldo.toFixed(2).replace(".", ","),
+                ]);
+                const totalRow = [
+                  "Total",
+                  totals.income.toFixed(2).replace(".", ","),
+                  totals.expense.toFixed(2).replace(".", ","),
+                  totals.savings.toFixed(2).replace(".", ","),
+                  balance.toFixed(2).replace(".", ","),
+                ];
+                const csv =
+                  "\ufeff" +
+                  [header, ...rows, totalRow]
+                    .map((r) =>
+                      r
+                        .map((v) => {
+                          const s = String(v);
+                          return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+                        })
+                        .join(";"),
+                    )
+                    .join("\n");
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `visao-anual-${year}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }}
+            >
+              <Download className="h-4 w-4" />
+              Exportar CSV
+            </Button>
+            <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+              <SelectTrigger className="w-28 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {yearOptions.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </header>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
