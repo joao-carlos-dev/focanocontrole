@@ -37,14 +37,28 @@ export type Recurring = {
   due_day: number | null;
 };
 
-const DELETED_MONTH_ENTRY_MARKER = "__deleted_month_entry__";
+const SKIP_KEY = "finance:skipped_recurring";
 
-const isDeletedMonthEntry = (entry: any) =>
-  entry?.note === DELETED_MONTH_ENTRY_MARKER && Number(entry?.amount) === 0;
+const readSkipped = (): Record<string, true> => {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(SKIP_KEY) || "{}");
+  } catch {
+    return {};
+  }
+};
+const writeSkipped = (s: Record<string, true>) => {
+  try {
+    localStorage.setItem(SKIP_KEY, JSON.stringify(s));
+  } catch {}
+};
+const skipKey = (scope: string, categoryId: string, year: number, month: number) =>
+  `${scope}:${categoryId}:${year}-${month}`;
 
 export function useFinance(year: number, month: number) {
   const { user, profile } = useAuth();
   const activeGroupId = profile?.active_group_id ?? null;
+  const scopeKey = activeGroupId ?? user?.id ?? "anon";
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [recurring, setRecurring] = useState<Recurring[]>([]);
@@ -70,10 +84,9 @@ export function useFinance(year: number, month: number) {
       .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`)
       .eq("year", year)
       .eq("month", month);
-    const visible = (data || []).filter((d: any) => !isDeletedMonthEntry(d));
     if (data)
       setEntries(
-        visible.map((d: any) => ({ ...d, amount: Number(d.amount) })) as Entry[],
+        (data || []).map((d: any) => ({ ...d, amount: Number(d.amount) })) as Entry[],
       );
     return (data || []) as any[];
   }, [year, month, user, activeGroupId]);
@@ -95,9 +108,15 @@ export function useFinance(year: number, month: number) {
   const applyRecurringIfMissing = useCallback(
     async (recList: Recurring[], existing: any[]) => {
       if (!user) return;
+      const skipped = readSkipped();
       const existingCategoryIds = new Set(existing.map((e) => e.category_id));
       const toInsert = recList
-        .filter((r) => r.active && !existingCategoryIds.has(r.category_id))
+        .filter(
+          (r) =>
+            r.active &&
+            !existingCategoryIds.has(r.category_id) &&
+            !skipped[skipKey(scopeKey, r.category_id, year, month)],
+        )
         .map((r) => {
           const day = r.due_day && r.due_day >= 1 && r.due_day <= 28 ? r.due_day : null;
           const due = day
@@ -127,7 +146,7 @@ export function useFinance(year: number, month: number) {
         ]);
       }
     },
-    [year, month, user, activeGroupId],
+    [year, month, user, activeGroupId, scopeKey],
   );
 
   const loadEditorNames = useCallback(async (entryList: Entry[], categoryList: Category[]) => {
