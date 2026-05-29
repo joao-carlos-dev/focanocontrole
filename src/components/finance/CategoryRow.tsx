@@ -541,6 +541,20 @@ export function CategoryRow({
                         <span className="ml-auto text-sm font-semibold tabular-nums">
                           {formatBRL(subTotal)}
                         </span>
+                        {sub.kind === "expense" && (
+                          <label
+                            className="flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-muted-foreground select-none"
+                            title="Recorrente — repetir nos próximos meses"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={subPinned}
+                              onChange={(e) => toggleRecurring(sub, e.target.checked)}
+                              className="h-3.5 w-3.5 cursor-pointer accent-primary"
+                            />
+                            <span className="hidden sm:inline">Recorrente</span>
+                          </label>
+                        )}
                         <Button
                           size="icon"
                           variant="ghost"
