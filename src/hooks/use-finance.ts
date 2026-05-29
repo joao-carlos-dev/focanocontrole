@@ -378,22 +378,68 @@ export function useFinance(year: number, month: number) {
         ]);
     }
 
-    // Update existing entry of current month to reflect new due_date if applicable
+    // Ensure the current month reflects the recurring value:
+    // - if an entry already exists, update amount/note/due_date
+    // - if no entry exists, create one for this month using the recurring values
     const day = due_day && due_day >= 1 && due_day <= 28 ? due_day : null;
+    const newDue = day
+      ? new Date(year, month - 1, day).toISOString().slice(0, 10)
+      : null;
     const existingEntry = entries.find((e) => e.category_id === category_id);
-    if (existingEntry && day) {
-      const newDue = new Date(year, month - 1, day).toISOString().slice(0, 10);
-      if (existingEntry.due_date !== newDue) {
-        await supabase
-          .from("entries")
-          .update({ due_date: newDue, updated_by: user.id })
-          .eq("id", existingEntry.id);
+
+    // Clear the "skip this recurring for this month" flag so the value shows up.
+    const skipped = readSkipped();
+    const sk = skipKey(scopeKey, category_id, year, month);
+    if (skipped[sk]) {
+      delete skipped[sk];
+      writeSkipped(skipped);
+    }
+
+    if (existingEntry) {
+      const update: any = {
+        amount,
+        note: note ?? null,
+        updated_by: user.id,
+      };
+      if (newDue) update.due_date = newDue;
+      const { data: upd } = await supabase
+        .from("entries")
+        .update(update)
+        .eq("id", existingEntry.id)
+        .select()
+        .single();
+      if (upd)
         setEntries((prev) =>
           prev.map((e) =>
-            e.id === existingEntry.id ? { ...e, due_date: newDue } : e,
+            e.id === existingEntry.id
+              ? { ...(upd as any), amount: Number((upd as any).amount) }
+              : e,
           ),
         );
-      }
+    } else {
+      const { data: ins } = await supabase
+        .from("entries")
+        .insert({
+          user_id: user.id,
+          group_id: activeGroupId,
+          created_by: user.id,
+          updated_by: user.id,
+          category_id,
+          amount,
+          note: note || null,
+          month,
+          year,
+          entry_date: new Date(year, month - 1, 1).toISOString().slice(0, 10),
+          due_date: newDue,
+          paid: false,
+        })
+        .select()
+        .single();
+      if (ins)
+        setEntries((prev) => [
+          ...prev,
+          { ...(ins as any), amount: Number((ins as any).amount) },
+        ]);
     }
   };
 
