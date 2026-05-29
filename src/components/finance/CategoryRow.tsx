@@ -473,6 +473,21 @@ export function CategoryRow({
           <div className={`text-base font-bold tabular-nums ${accentColor}`}>
             {formatBRL(total)}
           </div>
+          {subcategories.length === 0 && isExpense && (
+            <label
+              className="flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-muted-foreground select-none"
+              onClick={(e) => e.stopPropagation()}
+              title="Recorrente — repetir nos próximos meses"
+            >
+              <input
+                type="checkbox"
+                checked={isPinned}
+                onChange={(e) => toggleRecurring(category, e.target.checked)}
+                className="h-3.5 w-3.5 cursor-pointer accent-primary"
+              />
+              <span className="hidden sm:inline">Recorrente</span>
+            </label>
+          )}
           {subcategories.length === 0 && (
             <Button
               size="icon"
