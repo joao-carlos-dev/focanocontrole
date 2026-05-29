@@ -69,7 +69,7 @@ export function CategoryRow({
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [recurringNew, setRecurringNew] = useState(false);
+  
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editNote, setEditNote] = useState("");
@@ -168,22 +168,31 @@ export function CategoryRow({
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
     if (isNaN(v) || v <= 0) return;
-    if (recurringNew && isExpense) {
-      // Create recurring template — this also creates/updates the current month entry.
-      let dueDay: number | null = null;
-      if (dueDate) {
-        const d = new Date(dueDate + "T00:00:00").getDate();
-        if (d >= 1 && d <= 28) dueDay = d;
-      }
-      await onSetRecurring(catId, v, note, dueDay);
-    } else {
-      await onAddEntry(catId, v, note, dueDate || null);
-    }
+    await onAddEntry(catId, v, note, dueDate || null);
     setAmount("");
     setNote("");
     setDueDate("");
-    setRecurringNew(false);
     setAdding(null);
+  };
+
+  const toggleRecurring = async (cat: Category, checked: boolean) => {
+    if (checked) {
+      // Use the current month's entry value (if any) to seed the recurring template.
+      const current = allEntries.find((e) => e.category_id === cat.id);
+      if (current && current.amount > 0) {
+        let dueDay: number | null = null;
+        if (current.due_date) {
+          const d = new Date(current.due_date + "T00:00:00").getDate();
+          if (d >= 1 && d <= 28) dueDay = d;
+        }
+        await onSetRecurring(cat.id, current.amount, current.note ?? undefined, dueDay);
+      } else {
+        // No value yet — open the dialog so the user can set one.
+        setRecurringFor(cat);
+      }
+    } else {
+      await onRemoveRecurring(cat.id);
+    }
   };
 
   const startEdit = (e: Entry) => {
@@ -394,26 +403,13 @@ export function CategoryRow({
               setAmount("");
               setNote("");
               setDueDate("");
-              setRecurringNew(false);
+              
             }}
           >
             <X className="h-4 w-4" />
           </Button>
-          {isExpense && (
-            <label className="flex w-full cursor-pointer items-center gap-2 pl-1 pt-1 text-xs text-muted-foreground select-none">
-              <input
-                type="checkbox"
-                checked={recurringNew}
-                onChange={(e) => setRecurringNew(e.target.checked)}
-                className="h-3.5 w-3.5 cursor-pointer accent-primary"
-              />
-              <Pin className="h-3 w-3 text-primary" />
-              <span>
-                Recorrente — repetir nos próximos meses
-              </span>
-            </label>
-          )}
         </div>
+
       ) : (
         <Button
           size="sm"
@@ -477,6 +473,21 @@ export function CategoryRow({
           <div className={`text-base font-bold tabular-nums ${accentColor}`}>
             {formatBRL(total)}
           </div>
+          {subcategories.length === 0 && isExpense && (
+            <label
+              className="flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-muted-foreground select-none"
+              onClick={(e) => e.stopPropagation()}
+              title="Recorrente — repetir nos próximos meses"
+            >
+              <input
+                type="checkbox"
+                checked={isPinned}
+                onChange={(e) => toggleRecurring(category, e.target.checked)}
+                className="h-3.5 w-3.5 cursor-pointer accent-primary"
+              />
+              <span className="hidden sm:inline">Recorrente</span>
+            </label>
+          )}
           {subcategories.length === 0 && (
             <Button
               size="icon"
@@ -530,6 +541,20 @@ export function CategoryRow({
                         <span className="ml-auto text-sm font-semibold tabular-nums">
                           {formatBRL(subTotal)}
                         </span>
+                        {sub.kind === "expense" && (
+                          <label
+                            className="flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-muted-foreground select-none"
+                            title="Recorrente — repetir nos próximos meses"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={subPinned}
+                              onChange={(e) => toggleRecurring(sub, e.target.checked)}
+                              className="h-3.5 w-3.5 cursor-pointer accent-primary"
+                            />
+                            <span className="hidden sm:inline">Recorrente</span>
+                          </label>
+                        )}
                         <Button
                           size="icon"
                           variant="ghost"
