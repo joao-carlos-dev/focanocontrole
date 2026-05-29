@@ -69,6 +69,7 @@ export function CategoryRow({
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [recurringNew, setRecurringNew] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editNote, setEditNote] = useState("");
