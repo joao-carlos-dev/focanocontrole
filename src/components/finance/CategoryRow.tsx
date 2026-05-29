@@ -403,7 +403,7 @@ export function CategoryRow({
               setAmount("");
               setNote("");
               setDueDate("");
-              setRecurringNew(false);
+              
             }}
           >
             <X className="h-4 w-4" />
