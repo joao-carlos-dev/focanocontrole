@@ -168,10 +168,21 @@ export function CategoryRow({
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
     if (isNaN(v) || v <= 0) return;
-    await onAddEntry(catId, v, note, dueDate || null);
+    if (recurringNew && isExpense) {
+      // Create recurring template — this also creates/updates the current month entry.
+      let dueDay: number | null = null;
+      if (dueDate) {
+        const d = new Date(dueDate + "T00:00:00").getDate();
+        if (d >= 1 && d <= 28) dueDay = d;
+      }
+      await onSetRecurring(catId, v, note, dueDay);
+    } else {
+      await onAddEntry(catId, v, note, dueDate || null);
+    }
     setAmount("");
     setNote("");
     setDueDate("");
+    setRecurringNew(false);
     setAdding(null);
   };
 
