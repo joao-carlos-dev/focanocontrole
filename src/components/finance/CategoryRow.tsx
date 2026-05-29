@@ -168,22 +168,31 @@ export function CategoryRow({
   const handleAdd = async (catId: string) => {
     const v = parseFloat(amount.replace(",", "."));
     if (isNaN(v) || v <= 0) return;
-    if (recurringNew && isExpense) {
-      // Create recurring template — this also creates/updates the current month entry.
-      let dueDay: number | null = null;
-      if (dueDate) {
-        const d = new Date(dueDate + "T00:00:00").getDate();
-        if (d >= 1 && d <= 28) dueDay = d;
-      }
-      await onSetRecurring(catId, v, note, dueDay);
-    } else {
-      await onAddEntry(catId, v, note, dueDate || null);
-    }
+    await onAddEntry(catId, v, note, dueDate || null);
     setAmount("");
     setNote("");
     setDueDate("");
-    setRecurringNew(false);
     setAdding(null);
+  };
+
+  const toggleRecurring = async (cat: Category, checked: boolean) => {
+    if (checked) {
+      // Use the current month's entry value (if any) to seed the recurring template.
+      const current = allEntries.find((e) => e.category_id === cat.id);
+      if (current && current.amount > 0) {
+        let dueDay: number | null = null;
+        if (current.due_date) {
+          const d = new Date(current.due_date + "T00:00:00").getDate();
+          if (d >= 1 && d <= 28) dueDay = d;
+        }
+        await onSetRecurring(cat.id, current.amount, current.note ?? undefined, dueDay);
+      } else {
+        // No value yet — open the dialog so the user can set one.
+        setRecurringFor(cat);
+      }
+    } else {
+      await onRemoveRecurring(cat.id);
+    }
   };
 
   const startEdit = (e: Entry) => {
