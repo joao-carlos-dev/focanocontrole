@@ -187,6 +187,34 @@ export function useFinance(year: number, month: number) {
     })();
   }, [user, activeGroupId, loadCategories, loadEntries, loadRecurring, applyRecurringIfMissing, loadEditorNames]);
 
+  const syncRecurringAmount = async (
+    category_id: string,
+    amount: number,
+    note?: string | null,
+  ) => {
+    if (!user) return;
+    const existing = recurring.find((r) => r.category_id === category_id);
+    if (!existing) return;
+    const { data } = await supabase
+      .from("recurring_amounts")
+      .update({
+        amount,
+        note: note ?? null,
+        updated_by: user.id,
+      })
+      .eq("id", existing.id)
+      .select()
+      .single();
+    if (data)
+      setRecurring((prev) =>
+        prev.map((r) =>
+          r.id === existing.id
+            ? { ...(data as any), amount: Number((data as any).amount) }
+            : r,
+        ),
+      );
+  };
+
   const addEntry = async (
     category_id: string,
     amount: number,
@@ -213,7 +241,6 @@ export function useFinance(year: number, month: number) {
       .select()
       .single();
     if (data) {
-      // Clear any previous "skip this recurring for this month" flag.
       const skipped = readSkipped();
       const k = skipKey(scopeKey, category_id, year, month);
       if (skipped[k]) {
@@ -224,6 +251,7 @@ export function useFinance(year: number, month: number) {
         ...prev,
         { ...(data as any), amount: Number((data as any).amount) },
       ]);
+      await syncRecurringAmount(category_id, amount, note);
     }
   };
 
@@ -241,7 +269,7 @@ export function useFinance(year: number, month: number) {
       .eq("id", id)
       .select()
       .single();
-    if (data)
+    if (data) {
       setEntries((prev) =>
         prev.map((e) =>
           e.id === id
@@ -249,6 +277,8 @@ export function useFinance(year: number, month: number) {
             : e,
         ),
       );
+      await syncRecurringAmount((data as any).category_id, amount, note);
+    }
   };
 
   const togglePaid = async (id: string, paid: boolean) => {
