@@ -399,21 +399,8 @@ export function CategoryRow({
           >
             <X className="h-4 w-4" />
           </Button>
-          {isExpense && (
-            <label className="flex w-full cursor-pointer items-center gap-2 pl-1 pt-1 text-xs text-muted-foreground select-none">
-              <input
-                type="checkbox"
-                checked={recurringNew}
-                onChange={(e) => setRecurringNew(e.target.checked)}
-                className="h-3.5 w-3.5 cursor-pointer accent-primary"
-              />
-              <Pin className="h-3 w-3 text-primary" />
-              <span>
-                Recorrente — repetir nos próximos meses
-              </span>
-            </label>
-          )}
         </div>
+
       ) : (
         <Button
           size="sm"
