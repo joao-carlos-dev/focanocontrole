@@ -213,6 +213,72 @@ export function useFinance(year: number, month: number) {
             : r,
         ),
       );
+
+    // Propagate the new value/note to every other month's entry that
+    // already exists for this recurring category (current year + future).
+    await supabase
+      .from("entries")
+      .update({ amount, note: note ?? null, updated_by: user.id })
+      .eq("category_id", category_id)
+      .or(
+        `and(year.eq.${year},month.gt.${month}),year.gt.${year}`,
+      );
+  };
+
+  // Create entries for every month of the current year that doesn't have one
+  // yet (and isn't explicitly skipped), so fixed accounts show up everywhere.
+  const propagateRecurringToYear = async (
+    category_id: string,
+    amount: number,
+    note: string | null,
+    due_day: number | null,
+  ) => {
+    if (!user) return;
+    // Check which months already have an entry for this category in this year.
+    const { data: existing } = await supabase
+      .from("entries")
+      .select("month")
+      .eq("category_id", category_id)
+      .eq("year", year)
+      .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`);
+    const existingMonths = new Set((existing || []).map((e: any) => e.month));
+    const skipped = readSkipped();
+    const day = due_day && due_day >= 1 && due_day <= 28 ? due_day : null;
+
+    const rows: any[] = [];
+    for (let m = 1; m <= 12; m++) {
+      if (existingMonths.has(m)) continue;
+      if (skipped[skipKey(scopeKey, category_id, year, m)]) continue;
+      const due = day
+        ? new Date(year, m - 1, day).toISOString().slice(0, 10)
+        : null;
+      rows.push({
+        user_id: user.id,
+        group_id: activeGroupId,
+        created_by: user.id,
+        updated_by: user.id,
+        category_id,
+        amount,
+        note: note || null,
+        month: m,
+        year,
+        entry_date: new Date(year, m - 1, 1).toISOString().slice(0, 10),
+        due_date: due,
+        paid: false,
+      });
+    }
+    if (rows.length === 0) return;
+    const { data } = await supabase.from("entries").insert(rows).select();
+    if (data) {
+      // Only the entries that match the currently viewed month should be
+      // merged into local state.
+      setEntries((prev) => [
+        ...prev,
+        ...data
+          .filter((d: any) => d.month === month && d.year === year)
+          .map((d: any) => ({ ...d, amount: Number(d.amount) })),
+      ]);
+    }
   };
 
   const addEntry = async (
@@ -471,6 +537,9 @@ export function useFinance(year: number, month: number) {
           { ...(ins as any), amount: Number((ins as any).amount) },
         ]);
     }
+
+    // Make sure this fixed value shows up in every other month of the year too.
+    await propagateRecurringToYear(category_id, amount, note ?? null, due_day ?? null);
   };
 
   const removeRecurringForCategory = async (category_id: string) => {
