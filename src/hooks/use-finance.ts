@@ -223,6 +223,15 @@ export function useFinance(year: number, month: number) {
       .or(
         `and(year.eq.${year},month.gt.${month}),year.gt.${year}`,
       );
+
+    // Also CREATE entries for any future month of the current year that
+    // doesn't have one yet, so fixed accounts show their value everywhere.
+    await propagateRecurringToYear(
+      category_id,
+      amount,
+      note ?? null,
+      existing.due_day ?? null,
+    );
   };
 
   // Create entries for every month of the current year that doesn't have one
