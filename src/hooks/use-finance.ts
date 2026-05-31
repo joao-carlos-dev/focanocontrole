@@ -537,6 +537,9 @@ export function useFinance(year: number, month: number) {
           { ...(ins as any), amount: Number((ins as any).amount) },
         ]);
     }
+
+    // Make sure this fixed value shows up in every other month of the year too.
+    await propagateRecurringToYear(category_id, amount, note ?? null, due_day ?? null);
   };
 
   const removeRecurringForCategory = async (category_id: string) => {
