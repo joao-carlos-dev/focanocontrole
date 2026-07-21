@@ -512,10 +512,11 @@ export function CategoryRow({
             className="h-7 w-7 text-muted-foreground hover:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
-              if (confirm(`Excluir categoria "${category.name}" e todos os lançamentos?`)) {
+              if (confirm(`Excluir os lançamentos de "${category.name}" apenas deste mês?`)) {
                 onDeleteCategory(category.id);
               }
             }}
+            title="Excluir lançamentos deste mês"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -573,10 +574,11 @@ export function CategoryRow({
                           variant="ghost"
                           className="h-6 w-6 text-muted-foreground hover:text-destructive"
                           onClick={() => {
-                            if (confirm(`Excluir subcategoria "${sub.name}"?`)) {
+                            if (confirm(`Excluir os lançamentos de "${sub.name}" apenas deste mês?`)) {
                               onDeleteCategory(sub.id);
                             }
                           }}
+                          title="Excluir lançamentos deste mês"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
