@@ -83,7 +83,12 @@ function AnnualView() {
   }, [year, user, profile?.active_group_id]);
 
   const { monthly, totals, byCategoryMonthly, topCats } = useMemo(() => {
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const START_YEAR = 2026;
+    const START_MONTH = 5;
+    const startMonth = year === START_YEAR ? START_MONTH : year < START_YEAR ? 13 : 1;
+    const months = Array.from({ length: 12 }, (_, i) => i + 1).filter(
+      (m) => m >= startMonth,
+    );
     const byMonth = months.map((m) => {
       let income = 0,
         expense = 0,
