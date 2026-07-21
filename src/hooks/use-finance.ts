@@ -423,12 +423,42 @@ export function useFinance(year: number, month: number) {
   };
 
   const deleteCategory = async (id: string) => {
-    await supabase.from("categories").delete().eq("id", id);
-    setCategories((prev) =>
-      prev.filter((c) => c.id !== id && c.parent_id !== id),
+    if (!user) return;
+
+    // In the dashboard, "excluir gasto" must affect only the selected month.
+    // Keep the category and all previous/future months intact.
+    const categoryIds = [
+      id,
+      ...categories.filter((c) => c.parent_id === id).map((c) => c.id),
+    ];
+
+    await supabase
+      .from("entries")
+      .delete()
+      .in("category_id", categoryIds)
+      .eq("year", year)
+      .eq("month", month)
+      .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`);
+
+    const recurringCategoryIds = categoryIds.filter((categoryId) =>
+      recurring.some((r) => r.category_id === categoryId),
     );
-    setEntries((prev) => prev.filter((e) => e.category_id !== id));
-    setRecurring((prev) => prev.filter((r) => r.category_id !== id));
+    if (recurringCategoryIds.length > 0) {
+      const skipped = readSkipped();
+      for (const categoryId of recurringCategoryIds) {
+        skipped[skipKey(scopeKey, categoryId, year, month)] = true;
+      }
+      writeSkipped(skipped);
+    }
+
+    setEntries((prev) =>
+      prev.filter(
+        (e) =>
+          !categoryIds.includes(e.category_id) ||
+          e.year !== year ||
+          e.month !== month,
+      ),
+    );
   };
 
   const setRecurringForCategory = async (
