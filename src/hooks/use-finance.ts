@@ -503,6 +503,32 @@ export function useFinance(year: number, month: number) {
           e.month !== month,
       ),
     );
+
+    // Hide the category card from THIS month only. Other months are untouched
+    // and the category can be brought back by adding a new entry (which
+    // un-hides it) or from the "Restaurar" action in the Add dialog.
+    const hidden = readHidden();
+    for (const cid of categoryIds) {
+      hidden[skipKey(scopeKey, cid, year, month)] = true;
+    }
+    writeHidden(hidden);
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      for (const cid of categoryIds) next.add(cid);
+      return next;
+    });
+  };
+
+  const restoreCategoryForMonth = (id: string) => {
+    const ids = [id, ...categories.filter((c) => c.parent_id === id).map((c) => c.id)];
+    const hidden = readHidden();
+    for (const cid of ids) delete hidden[skipKey(scopeKey, cid, year, month)];
+    writeHidden(hidden);
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      for (const cid of ids) next.delete(cid);
+      return next;
+    });
   };
 
   const setRecurringForCategory = async (
