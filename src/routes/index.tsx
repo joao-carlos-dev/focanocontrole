@@ -63,15 +63,15 @@ function Dashboard() {
       );
     };
     const rootExp = roots
-      .filter((c) => c.kind === "expense")
+      .filter((c) => c.kind === "expense" && !hiddenIds.has(c.id))
       .sort((a, b) => {
         const pa = isPinned(a) ? 1 : 0;
         const pb = isPinned(b) ? 1 : 0;
         if (pa !== pb) return pb - pa;
         return a.sort_order - b.sort_order;
       });
-    const sav = roots.filter((c) => c.kind === "savings");
-    const inc = roots.filter((c) => c.kind === "income");
+    const sav = roots.filter((c) => c.kind === "savings" && !hiddenIds.has(c.id));
+    const inc = roots.filter((c) => c.kind === "income" && !hiddenIds.has(c.id));
 
     let totalExp = 0;
     let totalSav = 0;
