@@ -47,6 +47,8 @@ function Dashboard() {
     deleteEntry,
     addCategory,
     deleteCategory,
+    restoreCategoryForMonth,
+    hiddenIds,
     setRecurringForCategory,
     removeRecurringForCategory,
   } = useFinance(year, month);
