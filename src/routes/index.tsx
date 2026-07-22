@@ -93,7 +93,12 @@ function Dashboard() {
       totalSavings: totalSav,
       totalIncome: totalInc,
     };
-  }, [categories, entries, recurring]);
+  }, [categories, entries, recurring, hiddenIds]);
+
+  const hiddenList = useMemo(
+    () => categories.filter((c) => !c.parent_id && hiddenIds.has(c.id)),
+    [categories, hiddenIds],
+  );
 
   const rowProps = {
     recurring,
