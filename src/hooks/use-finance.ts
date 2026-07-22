@@ -78,6 +78,16 @@ export function useFinance(year: number, month: number) {
   const [recurring, setRecurring] = useState<Recurring[]>([]);
   const [editorNames, setEditorNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const hidden = readHidden();
+    const ids = new Set<string>();
+    for (const c of categories) {
+      if (hidden[skipKey(scopeKey, c.id, year, month)]) ids.add(c.id);
+    }
+    setHiddenIds(ids);
+  }, [categories, year, month, scopeKey]);
 
   const loadCategories = useCallback(async () => {
     if (!user) return;
