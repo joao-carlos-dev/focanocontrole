@@ -47,6 +47,8 @@ function Dashboard() {
     deleteEntry,
     addCategory,
     deleteCategory,
+    restoreCategoryForMonth,
+    hiddenIds,
     setRecurringForCategory,
     removeRecurringForCategory,
   } = useFinance(year, month);
@@ -61,15 +63,15 @@ function Dashboard() {
       );
     };
     const rootExp = roots
-      .filter((c) => c.kind === "expense")
+      .filter((c) => c.kind === "expense" && !hiddenIds.has(c.id))
       .sort((a, b) => {
         const pa = isPinned(a) ? 1 : 0;
         const pb = isPinned(b) ? 1 : 0;
         if (pa !== pb) return pb - pa;
         return a.sort_order - b.sort_order;
       });
-    const sav = roots.filter((c) => c.kind === "savings");
-    const inc = roots.filter((c) => c.kind === "income");
+    const sav = roots.filter((c) => c.kind === "savings" && !hiddenIds.has(c.id));
+    const inc = roots.filter((c) => c.kind === "income" && !hiddenIds.has(c.id));
 
     let totalExp = 0;
     let totalSav = 0;
@@ -91,7 +93,12 @@ function Dashboard() {
       totalSavings: totalSav,
       totalIncome: totalInc,
     };
-  }, [categories, entries, recurring]);
+  }, [categories, entries, recurring, hiddenIds]);
+
+  const hiddenList = useMemo(
+    () => categories.filter((c) => !c.parent_id && hiddenIds.has(c.id)),
+    [categories, hiddenIds],
+  );
 
   const rowProps = {
     recurring,
@@ -201,6 +208,26 @@ function Dashboard() {
             </h2>
             <AddCategoryDialog categories={categories} onAdd={addCategory} />
           </div>
+          {hiddenList.length > 0 && (
+            <div className="rounded-xl border border-dashed border-border bg-card/40 p-3">
+              <div className="mb-2 text-xs text-muted-foreground">
+                Excluídos neste mês — clique para restaurar:
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {hiddenList.map((c) => (
+                  <Button
+                    key={c.id}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 rounded-full text-xs"
+                    onClick={() => restoreCategoryForMonth(c.id)}
+                  >
+                    + {c.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
           {loading ? (
             <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
               Carregando...

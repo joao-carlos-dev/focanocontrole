@@ -38,6 +38,7 @@ export type Recurring = {
 };
 
 const SKIP_KEY = "finance:skipped_recurring";
+const HIDDEN_KEY = "finance:hidden_categories_month";
 
 const readSkipped = (): Record<string, true> => {
   if (typeof window === "undefined") return {};
@@ -52,6 +53,19 @@ const writeSkipped = (s: Record<string, true>) => {
     localStorage.setItem(SKIP_KEY, JSON.stringify(s));
   } catch {}
 };
+const readHidden = (): Record<string, true> => {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(HIDDEN_KEY) || "{}");
+  } catch {
+    return {};
+  }
+};
+const writeHidden = (s: Record<string, true>) => {
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(s));
+  } catch {}
+};
 const skipKey = (scope: string, categoryId: string, year: number, month: number) =>
   `${scope}:${categoryId}:${year}-${month}`;
 
@@ -64,6 +78,16 @@ export function useFinance(year: number, month: number) {
   const [recurring, setRecurring] = useState<Recurring[]>([]);
   const [editorNames, setEditorNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const hidden = readHidden();
+    const ids = new Set<string>();
+    for (const c of categories) {
+      if (hidden[skipKey(scopeKey, c.id, year, month)]) ids.add(c.id);
+    }
+    setHiddenIds(ids);
+  }, [categories, year, month, scopeKey]);
 
   const loadCategories = useCallback(async () => {
     if (!user) return;
@@ -322,6 +346,26 @@ export function useFinance(year: number, month: number) {
         delete skipped[k];
         writeSkipped(skipped);
       }
+      // Adding a value for a category should un-hide it for this month.
+      const hidden = readHidden();
+      const cat = categories.find((c) => c.id === category_id);
+      const parentId = cat?.parent_id ?? null;
+      let changed = false;
+      const hk = skipKey(scopeKey, category_id, year, month);
+      if (hidden[hk]) { delete hidden[hk]; changed = true; }
+      if (parentId) {
+        const pk = skipKey(scopeKey, parentId, year, month);
+        if (hidden[pk]) { delete hidden[pk]; changed = true; }
+      }
+      if (changed) {
+        writeHidden(hidden);
+        setHiddenIds((prev) => {
+          const next = new Set(prev);
+          next.delete(category_id);
+          if (parentId) next.delete(parentId);
+          return next;
+        });
+      }
       setEntries((prev) => [
         ...prev,
         { ...(data as any), amount: Number((data as any).amount) },
@@ -459,6 +503,32 @@ export function useFinance(year: number, month: number) {
           e.month !== month,
       ),
     );
+
+    // Hide the category card from THIS month only. Other months are untouched
+    // and the category can be brought back by adding a new entry (which
+    // un-hides it) or from the "Restaurar" action in the Add dialog.
+    const hidden = readHidden();
+    for (const cid of categoryIds) {
+      hidden[skipKey(scopeKey, cid, year, month)] = true;
+    }
+    writeHidden(hidden);
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      for (const cid of categoryIds) next.add(cid);
+      return next;
+    });
+  };
+
+  const restoreCategoryForMonth = (id: string) => {
+    const ids = [id, ...categories.filter((c) => c.parent_id === id).map((c) => c.id)];
+    const hidden = readHidden();
+    for (const cid of ids) delete hidden[skipKey(scopeKey, cid, year, month)];
+    writeHidden(hidden);
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      for (const cid of ids) next.delete(cid);
+      return next;
+    });
   };
 
   const setRecurringForCategory = async (
@@ -600,6 +670,8 @@ export function useFinance(year: number, month: number) {
     deleteEntry,
     addCategory,
     deleteCategory,
+    restoreCategoryForMonth,
+    hiddenIds,
     setRecurringForCategory,
     removeRecurringForCategory,
     reload: loadEntries,
