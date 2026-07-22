@@ -346,6 +346,26 @@ export function useFinance(year: number, month: number) {
         delete skipped[k];
         writeSkipped(skipped);
       }
+      // Adding a value for a category should un-hide it for this month.
+      const hidden = readHidden();
+      const cat = categories.find((c) => c.id === category_id);
+      const parentId = cat?.parent_id ?? null;
+      let changed = false;
+      const hk = skipKey(scopeKey, category_id, year, month);
+      if (hidden[hk]) { delete hidden[hk]; changed = true; }
+      if (parentId) {
+        const pk = skipKey(scopeKey, parentId, year, month);
+        if (hidden[pk]) { delete hidden[pk]; changed = true; }
+      }
+      if (changed) {
+        writeHidden(hidden);
+        setHiddenIds((prev) => {
+          const next = new Set(prev);
+          next.delete(category_id);
+          if (parentId) next.delete(parentId);
+          return next;
+        });
+      }
       setEntries((prev) => [
         ...prev,
         { ...(data as any), amount: Number((data as any).amount) },
