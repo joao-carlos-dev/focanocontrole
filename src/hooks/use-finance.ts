@@ -670,6 +670,8 @@ export function useFinance(year: number, month: number) {
     deleteEntry,
     addCategory,
     deleteCategory,
+    restoreCategoryForMonth,
+    hiddenIds,
     setRecurringForCategory,
     removeRecurringForCategory,
     reload: loadEntries,
