@@ -38,6 +38,7 @@ export type Recurring = {
 };
 
 const SKIP_KEY = "finance:skipped_recurring";
+const HIDDEN_KEY = "finance:hidden_categories_month";
 
 const readSkipped = (): Record<string, true> => {
   if (typeof window === "undefined") return {};
@@ -50,6 +51,19 @@ const readSkipped = (): Record<string, true> => {
 const writeSkipped = (s: Record<string, true>) => {
   try {
     localStorage.setItem(SKIP_KEY, JSON.stringify(s));
+  } catch {}
+};
+const readHidden = (): Record<string, true> => {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(HIDDEN_KEY) || "{}");
+  } catch {
+    return {};
+  }
+};
+const writeHidden = (s: Record<string, true>) => {
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(s));
   } catch {}
 };
 const skipKey = (scope: string, categoryId: string, year: number, month: number) =>
