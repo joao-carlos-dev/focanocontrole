@@ -417,29 +417,48 @@ export function useFinance(year: number, month: number) {
       );
   };
 
+  // Months from (year, month) up to 2 years ahead — used to keep a deletion
+  // applied to the current month and all subsequent months.
+  const forwardMonths = (fromYear: number, fromMonth: number) => {
+    const list: { year: number; month: number }[] = [];
+    for (let y = fromYear; y <= fromYear + 2; y++) {
+      for (let m = 1; m <= 12; m++) {
+        if (y === fromYear && m < fromMonth) continue;
+        list.push({ year: y, month: m });
+      }
+    }
+    return list;
+  };
+
+  const markForwardSkipped = (categoryIds: string[], fromYear: number, fromMonth: number) => {
+    const skipped = readSkipped();
+    for (const cid of categoryIds) {
+      for (const { year: y, month: m } of forwardMonths(fromYear, fromMonth)) {
+        skipped[skipKey(scopeKey, cid, y, m)] = true;
+      }
+    }
+    writeSkipped(skipped);
+  };
+
   const deleteEntry = async (id: string) => {
     const entry = entries.find((e) => e.id === id);
     if (!entry) return;
 
-    // Hard delete the single row for this specific month only.
+    // Delete this month's row AND every subsequent month for this category.
+    await supabase.from("entries").delete().eq("id", id);
+
     await supabase
       .from("entries")
       .delete()
-      .eq("id", id)
-      .eq("year", entry.year)
-      .eq("month", entry.month);
+      .eq("category_id", entry.category_id)
+      .or(`and(year.eq.${entry.year},month.gt.${entry.month}),year.gt.${entry.year}`);
 
-    // If this category has a recurring template, remember that the user
-    // chose to skip it for this month so we don't auto-recreate it.
-    const isRecurringEntry = recurring.some((r) => r.category_id === entry.category_id);
-    if (isRecurringEntry) {
-      const skipped = readSkipped();
-      skipped[skipKey(scopeKey, entry.category_id, entry.year, entry.month)] = true;
-      writeSkipped(skipped);
-    }
+    // Remember the skip so recurring templates don't re-create these months.
+    markForwardSkipped([entry.category_id], entry.year, entry.month);
 
     setEntries((prev) => prev.filter((e) => e.id !== id));
   };
+
 
   const addCategory = async (
     name: string,
@@ -469,8 +488,8 @@ export function useFinance(year: number, month: number) {
   const deleteCategory = async (id: string) => {
     if (!user) return;
 
-    // In the dashboard, "excluir gasto" must affect only the selected month.
-    // Keep the category and all previous/future months intact.
+    // "Excluir gasto" removes the entries of this month AND of every
+    // subsequent month. Previous months stay intact.
     const categoryIds = [
       id,
       ...categories.filter((c) => c.parent_id === id).map((c) => c.id),
@@ -480,20 +499,9 @@ export function useFinance(year: number, month: number) {
       .from("entries")
       .delete()
       .in("category_id", categoryIds)
-      .eq("year", year)
-      .eq("month", month)
-      .or(activeGroupId ? `group_id.eq.${activeGroupId}` : `and(user_id.eq.${user.id},group_id.is.null)`);
+      .or(`and(year.eq.${year},month.gte.${month}),year.gt.${year}`);
 
-    const recurringCategoryIds = categoryIds.filter((categoryId) =>
-      recurring.some((r) => r.category_id === categoryId),
-    );
-    if (recurringCategoryIds.length > 0) {
-      const skipped = readSkipped();
-      for (const categoryId of recurringCategoryIds) {
-        skipped[skipKey(scopeKey, categoryId, year, month)] = true;
-      }
-      writeSkipped(skipped);
-    }
+    markForwardSkipped(categoryIds, year, month);
 
     setEntries((prev) =>
       prev.filter(
@@ -504,12 +512,13 @@ export function useFinance(year: number, month: number) {
       ),
     );
 
-    // Hide the category card from THIS month only. Other months are untouched
-    // and the category can be brought back by adding a new entry (which
-    // un-hides it) or from the "Restaurar" action in the Add dialog.
+    // Hide the category card from this month onwards. Previous months are
+    // untouched, and adding a new entry un-hides it again.
     const hidden = readHidden();
     for (const cid of categoryIds) {
-      hidden[skipKey(scopeKey, cid, year, month)] = true;
+      for (const { year: y, month: m } of forwardMonths(year, month)) {
+        hidden[skipKey(scopeKey, cid, y, m)] = true;
+      }
     }
     writeHidden(hidden);
     setHiddenIds((prev) => {
@@ -518,6 +527,7 @@ export function useFinance(year: number, month: number) {
       return next;
     });
   };
+
 
   const restoreCategoryForMonth = (id: string) => {
     const ids = [id, ...categories.filter((c) => c.parent_id === id).map((c) => c.id)];
