@@ -417,29 +417,48 @@ export function useFinance(year: number, month: number) {
       );
   };
 
+  // Months from (year, month) up to 2 years ahead — used to keep a deletion
+  // applied to the current month and all subsequent months.
+  const forwardMonths = (fromYear: number, fromMonth: number) => {
+    const list: { year: number; month: number }[] = [];
+    for (let y = fromYear; y <= fromYear + 2; y++) {
+      for (let m = 1; m <= 12; m++) {
+        if (y === fromYear && m < fromMonth) continue;
+        list.push({ year: y, month: m });
+      }
+    }
+    return list;
+  };
+
+  const markForwardSkipped = (categoryIds: string[], fromYear: number, fromMonth: number) => {
+    const skipped = readSkipped();
+    for (const cid of categoryIds) {
+      for (const { year: y, month: m } of forwardMonths(fromYear, fromMonth)) {
+        skipped[skipKey(scopeKey, cid, y, m)] = true;
+      }
+    }
+    writeSkipped(skipped);
+  };
+
   const deleteEntry = async (id: string) => {
     const entry = entries.find((e) => e.id === id);
     if (!entry) return;
 
-    // Hard delete the single row for this specific month only.
+    // Delete this month's row AND every subsequent month for this category.
+    await supabase.from("entries").delete().eq("id", id);
+
     await supabase
       .from("entries")
       .delete()
-      .eq("id", id)
-      .eq("year", entry.year)
-      .eq("month", entry.month);
+      .eq("category_id", entry.category_id)
+      .or(`and(year.eq.${entry.year},month.gt.${entry.month}),year.gt.${entry.year}`);
 
-    // If this category has a recurring template, remember that the user
-    // chose to skip it for this month so we don't auto-recreate it.
-    const isRecurringEntry = recurring.some((r) => r.category_id === entry.category_id);
-    if (isRecurringEntry) {
-      const skipped = readSkipped();
-      skipped[skipKey(scopeKey, entry.category_id, entry.year, entry.month)] = true;
-      writeSkipped(skipped);
-    }
+    // Remember the skip so recurring templates don't re-create these months.
+    markForwardSkipped([entry.category_id], entry.year, entry.month);
 
     setEntries((prev) => prev.filter((e) => e.id !== id));
   };
+
 
   const addCategory = async (
     name: string,
