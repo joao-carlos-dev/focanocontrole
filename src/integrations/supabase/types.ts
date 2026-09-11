@@ -61,6 +61,53 @@ export type Database = {
           },
         ]
       }
+      debts: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          description: string
+          group_id: string | null
+          id: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description: string
+          group_id?: string | null
+          id?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          group_id?: string | null
+          id?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "family_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entries: {
         Row: {
           amount: number
