@@ -56,7 +56,10 @@ function Dashboard() {
     removeRecurringForCategory,
   } = useFinance(year, month);
 
+  const { total: totalDebts } = useDebts();
+
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
+
     const roots = categories.filter((c) => !c.parent_id);
     const recurringCatIds = new Set(recurring.filter((r) => r.active).map((r) => r.category_id));
     const isPinned = (cat: typeof categories[number]) => {
