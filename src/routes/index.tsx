@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Wallet, BarChart3, User as UserIcon, LogOut } from "lucide-react";
 import { useFinance } from "@/hooks/use-finance";
 import { useAuth } from "@/hooks/use-auth";
+import { useDebts } from "@/hooks/use-debts";
 import { MonthSelector } from "@/components/finance/MonthSelector";
 import { SummaryCards } from "@/components/finance/SummaryCards";
 import { CategoryChart } from "@/components/finance/CategoryChart";
@@ -10,6 +11,7 @@ import { CategoryRow } from "@/components/finance/CategoryRow";
 import { AddCategoryDialog } from "@/components/finance/AddCategoryDialog";
 import { DebtsSection } from "@/components/finance/DebtsSection";
 import { Button } from "@/components/ui/button";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
