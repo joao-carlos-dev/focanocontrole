@@ -177,7 +177,9 @@ function Dashboard() {
           totalIncome={totalIncome}
           totalExpense={totalExpense}
           totalSavings={totalSavings}
+          totalDebts={totalDebts}
         />
+
 
         <CategoryChart categories={categories} entries={entries} />
 
