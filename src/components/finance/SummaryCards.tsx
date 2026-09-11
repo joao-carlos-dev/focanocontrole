@@ -1,13 +1,14 @@
-import { TrendingDown, PiggyBank, Wallet, TrendingUp } from "lucide-react";
+import { TrendingDown, PiggyBank, Wallet, TrendingUp, Landmark } from "lucide-react";
 import { formatBRL } from "@/lib/format";
 
 interface Props {
   totalIncome: number;
   totalExpense: number;
   totalSavings: number;
+  totalDebts: number;
 }
 
-export function SummaryCards({ totalIncome, totalExpense, totalSavings }: Props) {
+export function SummaryCards({ totalIncome, totalExpense, totalSavings, totalDebts }: Props) {
   const balance = totalIncome - totalExpense - totalSavings;
   const cards = [
     {
@@ -38,10 +39,17 @@ export function SummaryCards({ totalIncome, totalExpense, totalSavings }: Props)
       accent: "from-primary/30 to-accent/20",
       iconColor: balance >= 0 ? "text-income" : "text-destructive",
     },
+    {
+      label: "Dívidas",
+      value: totalDebts,
+      icon: Landmark,
+      accent: "from-warning/30 to-warning/10",
+      iconColor: "text-warning",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
       {cards.map((c) => (
         <div
           key={c.label}
@@ -68,3 +76,4 @@ export function SummaryCards({ totalIncome, totalExpense, totalSavings }: Props)
     </div>
   );
 }
+
