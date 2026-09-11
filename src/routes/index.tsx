@@ -8,6 +8,7 @@ import { SummaryCards } from "@/components/finance/SummaryCards";
 import { CategoryChart } from "@/components/finance/CategoryChart";
 import { CategoryRow } from "@/components/finance/CategoryRow";
 import { AddCategoryDialog } from "@/components/finance/AddCategoryDialog";
+import { DebtsSection } from "@/components/finance/DebtsSection";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -269,6 +270,8 @@ function Dashboard() {
             ))}
           </div>
         </section>
+
+        <DebtsSection />
 
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Dados sincronizados na nuvem ✨
