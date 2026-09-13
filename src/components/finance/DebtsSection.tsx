@@ -235,7 +235,7 @@ export function DebtsSection({ year, month }: Props) {
                           variant="ghost"
                           className="cursor-pointer rounded-xl"
                           title="Editar valor"
-                          onClick={() => startEdit(d.id, d.amount, d.amount)}
+                          onClick={() => startEdit(d.id, d.description, d.amount)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>

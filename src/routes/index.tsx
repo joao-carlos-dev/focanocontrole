@@ -56,7 +56,10 @@ function Dashboard() {
     removeRecurringForCategory,
   } = useFinance(year, month);
 
-  const { total: totalDebts } = useDebts();
+  const { total: totalDebts, monthPaymentsTotal: debtPayments } = useDebts(
+    year,
+    month,
+  );
 
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
 
