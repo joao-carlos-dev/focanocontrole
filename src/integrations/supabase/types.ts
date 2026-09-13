@@ -61,6 +61,63 @@ export type Database = {
           },
         ]
       }
+      debt_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          debt_id: string
+          group_id: string | null
+          id: string
+          month: number
+          note: string | null
+          payment_date: string
+          user_id: string | null
+          year: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          debt_id: string
+          group_id?: string | null
+          id?: string
+          month: number
+          note?: string | null
+          payment_date?: string
+          user_id?: string | null
+          year: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          debt_id?: string
+          group_id?: string | null
+          id?: string
+          month?: number
+          note?: string | null
+          payment_date?: string
+          user_id?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_payments_debt_id_fkey"
+            columns: ["debt_id"]
+            isOneToOne: false
+            referencedRelation: "debts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "debt_payments_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "family_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       debts: {
         Row: {
           amount: number
@@ -70,6 +127,8 @@ export type Database = {
           group_id: string | null
           id: string
           sort_order: number
+          start_month: number | null
+          start_year: number | null
           updated_at: string
           updated_by: string | null
           user_id: string | null
@@ -82,6 +141,8 @@ export type Database = {
           group_id?: string | null
           id?: string
           sort_order?: number
+          start_month?: number | null
+          start_year?: number | null
           updated_at?: string
           updated_by?: string | null
           user_id?: string | null
@@ -94,6 +155,8 @@ export type Database = {
           group_id?: string | null
           id?: string
           sort_order?: number
+          start_month?: number | null
+          start_year?: number | null
           updated_at?: string
           updated_by?: string | null
           user_id?: string | null

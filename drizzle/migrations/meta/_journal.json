@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789301477642,
+      "tag": "0000_debt_payments_and_start_month",
+      "breakpoints": true
+    }
+  ]
+}
