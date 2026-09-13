@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { formatBRL, MONTHS_PT } from "@/lib/format";
 import type { Category, Entry } from "@/hooks/use-finance";
+import { useDebts } from "@/hooks/use-debts";
 
 export const Route = createFileRoute("/visao-anual")({
   head: () => ({
@@ -54,6 +55,7 @@ function AnnualView() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, profile, loading: authLoading } = useAuth();
+  const { totalAt: debtTotalAt, payments: debtPayments } = useDebts();
   const navigate = useNavigate();
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/auth" });
