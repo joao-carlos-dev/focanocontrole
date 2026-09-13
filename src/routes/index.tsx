@@ -56,7 +56,10 @@ function Dashboard() {
     removeRecurringForCategory,
   } = useFinance(year, month);
 
-  const { total: totalDebts } = useDebts();
+  const { total: totalDebts, monthPaymentsTotal: debtPayments } = useDebts(
+    year,
+    month,
+  );
 
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
 
@@ -178,6 +181,7 @@ function Dashboard() {
           totalExpense={totalExpense}
           totalSavings={totalSavings}
           totalDebts={totalDebts}
+          debtPayments={debtPayments}
         />
 
 
@@ -278,7 +282,7 @@ function Dashboard() {
           </div>
         </section>
 
-        <DebtsSection />
+        <DebtsSection year={year} month={month} />
 
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Dados sincronizados na nuvem ✨

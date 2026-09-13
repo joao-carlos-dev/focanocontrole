@@ -1,18 +1,45 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Check, X, Landmark } from "lucide-react";
-import { formatBRL } from "@/lib/format";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  Landmark,
+  HandCoins,
+} from "lucide-react";
+import { formatBRL, MONTHS_PT } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebts } from "@/hooks/use-debts";
 
-export function DebtsSection() {
-  const { debts, total, loading, addDebt, updateDebt, deleteDebt } = useDebts();
+interface Props {
+  year: number;
+  month: number;
+}
+
+export function DebtsSection({ year, month }: Props) {
+  const {
+    debts,
+    total,
+    loading,
+    addDebt,
+    updateDebt,
+    deleteDebt,
+    payDebt,
+    deletePayment,
+    monthPayments,
+    monthPaymentsTotal,
+    balanceAt,
+  } = useDebts(year, month);
   const [adding, setAdding] = useState(false);
   const [newDesc, setNewDesc] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDesc, setEditDesc] = useState("");
   const [editAmount, setEditAmount] = useState("");
+  const [payingId, setPayingId] = useState<string | null>(null);
+  const [payValue, setPayValue] = useState("");
 
   const parse = (v: string) => Number(v.replace(/\./g, "").replace(",", ".")) || 0;
 
@@ -36,6 +63,15 @@ export function DebtsSection() {
     setEditingId(null);
   };
 
+  const submitPay = async () => {
+    if (!payingId) return;
+    const value = parse(payValue);
+    if (value <= 0) return;
+    await payDebt(payingId, value);
+    setPayValue("");
+    setPayingId(null);
+  };
+
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
@@ -45,7 +81,7 @@ export function DebtsSection() {
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 rounded-xl"
+          className="cursor-pointer gap-1.5 rounded-xl"
           onClick={() => setAdding((v) => !v)}
         >
           <Plus className="h-4 w-4" />
@@ -54,19 +90,33 @@ export function DebtsSection() {
       </div>
 
       <div className="space-y-2.5 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elegant)]">
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-warning/10 px-3 py-2.5">
-          <div className="flex items-center gap-2">
-            <Landmark className="h-4 w-4 text-warning" />
-            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Total das dívidas
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-warning/10 px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <Landmark className="h-4 w-4 text-warning" />
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Total das dívidas
+              </span>
+            </div>
+            <span className="text-lg font-bold tracking-tight">{formatBRL(total)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-destructive/10 px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <HandCoins className="h-4 w-4 text-destructive" />
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Pago em {MONTHS_PT[month - 1]}
+              </span>
+            </div>
+            <span className="text-lg font-bold tracking-tight">
+              {formatBRL(monthPaymentsTotal)}
             </span>
           </div>
-          <span className="text-lg font-bold tracking-tight">{formatBRL(total)}</span>
         </div>
 
         <p className="text-xs text-muted-foreground">
-          As dívidas não entram no saldo do mês. Elas diminuem só quando você
-          reduzir o valor aqui.
+          O saldo das dívidas não desconta o saldo do mês. Só os pagamentos que
+          você registrar aqui são descontados — e apenas no mês em que foram
+          feitos.
         </p>
 
         {adding && (
@@ -89,13 +139,18 @@ export function DebtsSection() {
               }}
             />
             <div className="flex gap-2">
-              <Button size="icon" className="rounded-xl" onClick={submitNew} title="Salvar">
+              <Button
+                size="icon"
+                className="cursor-pointer rounded-xl"
+                onClick={submitNew}
+                title="Salvar"
+              >
                 <Check className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
                 variant="ghost"
-                className="rounded-xl"
+                className="cursor-pointer rounded-xl"
                 onClick={() => setAdding(false)}
                 title="Cancelar"
               >
@@ -115,67 +170,153 @@ export function DebtsSection() {
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {debts.map((d) => (
-              <div key={d.id} className="flex items-center gap-2 py-2.5">
-                {editingId === d.id ? (
-                  <>
-                    <Input
-                      value={editDesc}
-                      onChange={(e) => setEditDesc(e.target.value)}
-                      className="rounded-xl"
-                    />
-                    <Input
-                      value={editAmount}
-                      inputMode="decimal"
-                      onChange={(e) => setEditAmount(e.target.value)}
-                      className="w-28 rounded-xl"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") submitEdit();
-                      }}
-                    />
-                    <Button size="icon" className="rounded-xl" onClick={submitEdit} title="Salvar">
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="rounded-xl"
-                      onClick={() => setEditingId(null)}
-                      title="Cancelar"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <span className="flex-1 truncate text-sm font-medium">
-                      {d.description}
-                    </span>
-                    <span className="text-sm font-semibold tabular-nums">
-                      {formatBRL(d.amount)}
-                    </span>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="rounded-xl"
-                      title="Editar valor"
-                      onClick={() => startEdit(d.id, d.description, d.amount)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="rounded-xl text-destructive"
-                      title="Excluir dívida"
-                      onClick={() => deleteDebt(d.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-              </div>
-            ))}
+            {debts.map((d) => {
+              const paidThisMonth = monthPayments.filter((p) => p.debt_id === d.id);
+              return (
+                <div key={d.id} className="space-y-2 py-2.5">
+                  <div className="flex items-center gap-2">
+                    {editingId === d.id ? (
+                      <>
+                        <Input
+                          value={editDesc}
+                          onChange={(e) => setEditDesc(e.target.value)}
+                          className="rounded-xl"
+                        />
+                        <Input
+                          value={editAmount}
+                          inputMode="decimal"
+                          onChange={(e) => setEditAmount(e.target.value)}
+                          className="w-28 rounded-xl"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") submitEdit();
+                          }}
+                        />
+                        <Button
+                          size="icon"
+                          className="cursor-pointer rounded-xl"
+                          onClick={submitEdit}
+                          title="Salvar"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="cursor-pointer rounded-xl"
+                          onClick={() => setEditingId(null)}
+                          title="Cancelar"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="flex-1 truncate text-sm font-medium">
+                          {d.description}
+                        </span>
+                        <span className="text-sm font-semibold tabular-nums">
+                          {formatBRL(balanceAt(d.id, year, month))}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="cursor-pointer gap-1.5 rounded-xl"
+                          title="Registrar pagamento"
+                          onClick={() => {
+                            setPayingId(payingId === d.id ? null : d.id);
+                            setPayValue("");
+                          }}
+                        >
+                          <HandCoins className="h-4 w-4" />
+                          Pagar
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="cursor-pointer rounded-xl"
+                          title="Editar valor"
+                          onClick={() => startEdit(d.id, d.description, d.amount)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="cursor-pointer rounded-xl text-destructive"
+                          title="Excluir dívida"
+                          onClick={() => deleteDebt(d.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  {payingId === d.id && (
+                    <div className="flex flex-col gap-2 rounded-xl border border-dashed border-border p-3 sm:flex-row sm:items-center">
+                      <span className="text-xs text-muted-foreground">
+                        Valor pago em {MONTHS_PT[month - 1]}:
+                      </span>
+                      <Input
+                        autoFocus
+                        placeholder="0,00"
+                        inputMode="decimal"
+                        value={payValue}
+                        onChange={(e) => setPayValue(e.target.value)}
+                        className="rounded-xl sm:w-36"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") submitPay();
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        className="cursor-pointer rounded-xl"
+                        onClick={submitPay}
+                      >
+                        Descontar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="cursor-pointer rounded-xl"
+                        onClick={() => setPayingId(null)}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  )}
+
+                  {paidThisMonth.length > 0 && (
+                    <div className="space-y-1 pl-1">
+                      {paidThisMonth.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center gap-2 text-xs text-muted-foreground"
+                        >
+                          <span className="rounded-full bg-destructive/10 px-2 py-0.5 font-medium text-destructive">
+                            − {formatBRL(p.amount)}
+                          </span>
+                          <span>
+                            {new Date(p.payment_date + "T00:00:00").toLocaleDateString(
+                              "pt-BR",
+                            )}
+                          </span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6 cursor-pointer rounded-lg"
+                            title="Desfazer pagamento"
+                            onClick={() => deletePayment(p.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
