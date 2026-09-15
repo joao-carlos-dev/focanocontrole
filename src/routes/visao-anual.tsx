@@ -409,6 +409,44 @@ function AnnualView() {
               </div>
             </div>
 
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elegant)]">
+              <h3 className="mb-4 text-sm font-semibold tracking-tight">
+                Evolução das dívidas
+              </h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={monthly} margin={{ left: -10, right: 8, top: 4, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                    <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+                    <Tooltip
+                      contentStyle={{
+                        background: "var(--popover)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "0.75rem",
+                      }}
+                      formatter={(v) => formatBRL(Number(v))}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="Dívidas"
+                      stroke="var(--warning)"
+                      strokeWidth={3}
+                      dot={{ fill: "var(--warning)", r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="Pago em dívidas"
+                      stroke="var(--destructive)"
+                      strokeWidth={2}
+                      dot={{ fill: "var(--destructive)", r: 3 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
             {topCats.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elegant)]">
                 <h3 className="mb-4 text-sm font-semibold tracking-tight">
