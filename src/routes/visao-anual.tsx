@@ -244,12 +244,22 @@ function AnnualView() {
               size="sm"
               className="rounded-xl gap-1.5"
               onClick={() => {
-                const header = ["Mês", "Receitas", "Gastos", "Poupado", "Saldo"];
+                const header = [
+                  "Mês",
+                  "Receitas",
+                  "Gastos",
+                  "Poupado",
+                  "Dívidas",
+                  "Pago em dívidas",
+                  "Saldo",
+                ];
                 const rows = monthly.map((m) => [
                   MONTHS_PT[m.month - 1],
                   m.Receitas.toFixed(2).replace(".", ","),
                   m.Gastos.toFixed(2).replace(".", ","),
                   m.Poupado.toFixed(2).replace(".", ","),
+                  m["Dívidas"].toFixed(2).replace(".", ","),
+                  m["Pago em dívidas"].toFixed(2).replace(".", ","),
                   m.Saldo.toFixed(2).replace(".", ","),
                 ]);
                 const totalRow = [
@@ -257,6 +267,8 @@ function AnnualView() {
                   totals.income.toFixed(2).replace(".", ","),
                   totals.expense.toFixed(2).replace(".", ","),
                   totals.savings.toFixed(2).replace(".", ","),
+                  "",
+                  totals.debtsPaid.toFixed(2).replace(".", ","),
                   balance.toFixed(2).replace(".", ","),
                 ];
                 const csv =
