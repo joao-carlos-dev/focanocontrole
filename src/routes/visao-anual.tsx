@@ -125,9 +125,10 @@ function AnnualView() {
         acc.income += m.Receitas;
         acc.expense += m.Gastos;
         acc.savings += m.Poupado;
+        acc.debtsPaid += m["Pago em dívidas"];
         return acc;
       },
-      { income: 0, expense: 0, savings: 0 },
+      { income: 0, expense: 0, savings: 0, debtsPaid: 0 },
     );
 
     // expense by root category, monthly
