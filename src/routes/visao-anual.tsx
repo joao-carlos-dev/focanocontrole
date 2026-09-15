@@ -8,6 +8,7 @@ import {
   PiggyBank,
   Wallet,
   Download,
+  HandCoins,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -105,13 +106,18 @@ function AnnualView() {
         else if (root.kind === "savings") savings += e.amount;
         else expense += e.amount;
       }
+      const debtsPaid = debtPayments
+        .filter((p) => p.year === year && p.month === m)
+        .reduce((s, p) => s + p.amount, 0);
       return {
         month: m,
         name: MONTHS_PT[m - 1].slice(0, 3),
         Receitas: income,
         Gastos: expense,
         Poupado: savings,
-        Saldo: income - expense - savings,
+        Dívidas: debtTotalAt(year, m),
+        "Pago em dívidas": debtsPaid,
+        Saldo: income - expense - savings - debtsPaid,
       };
     });
 
@@ -120,9 +126,10 @@ function AnnualView() {
         acc.income += m.Receitas;
         acc.expense += m.Gastos;
         acc.savings += m.Poupado;
+        acc.debtsPaid += m["Pago em dívidas"];
         return acc;
       },
-      { income: 0, expense: 0, savings: 0 },
+      { income: 0, expense: 0, savings: 0, debtsPaid: 0 },
     );
 
     // expense by root category, monthly
@@ -168,9 +175,10 @@ function AnnualView() {
       byCategoryMonthly: byCatMonthly,
       topCats: top,
     };
-  }, [entries, categories]);
+  }, [entries, categories, year, debtPayments, debtTotalAt]);
 
-  const balance = totals.income - totals.expense - totals.savings;
+  const balance =
+    totals.income - totals.expense - totals.savings - totals.debtsPaid;
   const yearOptions = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
 
   const summary = [
@@ -194,6 +202,13 @@ function AnnualView() {
       icon: PiggyBank,
       iconColor: "text-savings",
       accent: "from-savings/30 to-accent/20",
+    },
+    {
+      label: "Pago em dívidas",
+      value: totals.debtsPaid,
+      icon: HandCoins,
+      iconColor: "text-destructive",
+      accent: "from-destructive/20 to-warning/10",
     },
     {
       label: "Saldo do ano",
@@ -237,12 +252,22 @@ function AnnualView() {
               size="sm"
               className="rounded-xl gap-1.5"
               onClick={() => {
-                const header = ["Mês", "Receitas", "Gastos", "Poupado", "Saldo"];
+                const header = [
+                  "Mês",
+                  "Receitas",
+                  "Gastos",
+                  "Poupado",
+                  "Dívidas",
+                  "Pago em dívidas",
+                  "Saldo",
+                ];
                 const rows = monthly.map((m) => [
                   MONTHS_PT[m.month - 1],
                   m.Receitas.toFixed(2).replace(".", ","),
                   m.Gastos.toFixed(2).replace(".", ","),
                   m.Poupado.toFixed(2).replace(".", ","),
+                  m["Dívidas"].toFixed(2).replace(".", ","),
+                  m["Pago em dívidas"].toFixed(2).replace(".", ","),
                   m.Saldo.toFixed(2).replace(".", ","),
                 ]);
                 const totalRow = [
@@ -250,6 +275,8 @@ function AnnualView() {
                   totals.income.toFixed(2).replace(".", ","),
                   totals.expense.toFixed(2).replace(".", ","),
                   totals.savings.toFixed(2).replace(".", ","),
+                  "",
+                  totals.debtsPaid.toFixed(2).replace(".", ","),
                   balance.toFixed(2).replace(".", ","),
                 ];
                 const csv =
@@ -293,7 +320,7 @@ function AnnualView() {
           </div>
         </header>
 
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
           {summary.map((c) => (
             <div
               key={c.label}
@@ -382,6 +409,44 @@ function AnnualView() {
               </div>
             </div>
 
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elegant)]">
+              <h3 className="mb-4 text-sm font-semibold tracking-tight">
+                Evolução das dívidas
+              </h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={monthly} margin={{ left: -10, right: 8, top: 4, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                    <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+                    <Tooltip
+                      contentStyle={{
+                        background: "var(--popover)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "0.75rem",
+                      }}
+                      formatter={(v) => formatBRL(Number(v))}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="Dívidas"
+                      stroke="var(--warning)"
+                      strokeWidth={3}
+                      dot={{ fill: "var(--warning)", r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="Pago em dívidas"
+                      stroke="var(--destructive)"
+                      strokeWidth={2}
+                      dot={{ fill: "var(--destructive)", r: 3 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
             {topCats.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elegant)]">
                 <h3 className="mb-4 text-sm font-semibold tracking-tight">
@@ -431,6 +496,8 @@ function AnnualView() {
                       <th className="px-4 py-2 text-right">Receitas</th>
                       <th className="px-4 py-2 text-right">Gastos</th>
                       <th className="px-4 py-2 text-right">Poupado</th>
+                      <th className="px-4 py-2 text-right">Dívidas</th>
+                      <th className="px-4 py-2 text-right">Pago em dívidas</th>
                       <th className="px-4 py-2 text-right">Saldo</th>
                     </tr>
                   </thead>
@@ -446,6 +513,12 @@ function AnnualView() {
                         </td>
                         <td className="px-4 py-2 text-right tabular-nums text-savings">
                           {formatBRL(m.Poupado)}
+                        </td>
+                        <td className="px-4 py-2 text-right tabular-nums text-warning">
+                          {formatBRL(m["Dívidas"])}
+                        </td>
+                        <td className="px-4 py-2 text-right tabular-nums text-destructive">
+                          {formatBRL(m["Pago em dívidas"])}
                         </td>
                         <td
                           className={`px-4 py-2 text-right font-semibold tabular-nums ${m.Saldo >= 0 ? "text-income" : "text-destructive"}`}
