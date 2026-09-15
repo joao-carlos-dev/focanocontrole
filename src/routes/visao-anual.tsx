@@ -458,6 +458,8 @@ function AnnualView() {
                       <th className="px-4 py-2 text-right">Receitas</th>
                       <th className="px-4 py-2 text-right">Gastos</th>
                       <th className="px-4 py-2 text-right">Poupado</th>
+                      <th className="px-4 py-2 text-right">Dívidas</th>
+                      <th className="px-4 py-2 text-right">Pago em dívidas</th>
                       <th className="px-4 py-2 text-right">Saldo</th>
                     </tr>
                   </thead>
