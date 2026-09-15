@@ -334,7 +334,7 @@ function AnnualView() {
                   <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {c.label}
                   </div>
-                  <div className="mt-1.5 text-xl font-bold tracking-tight sm:text-2xl">
+                  <div className="mt-1.5 text-base font-bold tracking-tight sm:text-lg">
                     {formatBRL(c.value)}
                   </div>
                 </div>
