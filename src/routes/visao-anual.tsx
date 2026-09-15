@@ -203,6 +203,13 @@ function AnnualView() {
       accent: "from-savings/30 to-accent/20",
     },
     {
+      label: "Pago em dívidas",
+      value: totals.debtsPaid,
+      icon: HandCoins,
+      iconColor: "text-destructive",
+      accent: "from-destructive/20 to-warning/10",
+    },
+    {
       label: "Saldo do ano",
       value: balance,
       icon: Wallet,
