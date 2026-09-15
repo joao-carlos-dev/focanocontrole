@@ -476,6 +476,12 @@ function AnnualView() {
                         <td className="px-4 py-2 text-right tabular-nums text-savings">
                           {formatBRL(m.Poupado)}
                         </td>
+                        <td className="px-4 py-2 text-right tabular-nums text-warning">
+                          {formatBRL(m["Dívidas"])}
+                        </td>
+                        <td className="px-4 py-2 text-right tabular-nums text-destructive">
+                          {formatBRL(m["Pago em dívidas"])}
+                        </td>
                         <td
                           className={`px-4 py-2 text-right font-semibold tabular-nums ${m.Saldo >= 0 ? "text-income" : "text-destructive"}`}
                         >
