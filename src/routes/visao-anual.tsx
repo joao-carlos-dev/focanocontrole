@@ -8,6 +8,7 @@ import {
   PiggyBank,
   Wallet,
   Download,
+  HandCoins,
 } from "lucide-react";
 import {
   ResponsiveContainer,
