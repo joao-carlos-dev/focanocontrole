@@ -105,13 +105,18 @@ function AnnualView() {
         else if (root.kind === "savings") savings += e.amount;
         else expense += e.amount;
       }
+      const debtsPaid = debtPayments
+        .filter((p) => p.year === year && p.month === m)
+        .reduce((s, p) => s + p.amount, 0);
       return {
         month: m,
         name: MONTHS_PT[m - 1].slice(0, 3),
         Receitas: income,
         Gastos: expense,
         Poupado: savings,
-        Saldo: income - expense - savings,
+        Dívidas: debtTotalAt(year, m),
+        "Pago em dívidas": debtsPaid,
+        Saldo: income - expense - savings - debtsPaid,
       };
     });
 
