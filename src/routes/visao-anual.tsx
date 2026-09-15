@@ -174,9 +174,10 @@ function AnnualView() {
       byCategoryMonthly: byCatMonthly,
       topCats: top,
     };
-  }, [entries, categories]);
+  }, [entries, categories, year, debtPayments, debtTotalAt]);
 
-  const balance = totals.income - totals.expense - totals.savings;
+  const balance =
+    totals.income - totals.expense - totals.savings - totals.debtsPaid;
   const yearOptions = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
 
   const summary = [
