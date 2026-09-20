@@ -108,3 +108,20 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
+
+.annual-bar-chart .recharts-bar-rectangle {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.annual-bar-chart .recharts-bar-rectangle:hover {
+  transform: scale(1.06, 1.04);
+  filter: brightness(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annual-bar-chart .recharts-bar-rectangle {
+    transition: none;
+  }
+}

@@ -24,6 +24,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ChartTooltip } from "@/components/finance/ChartTooltip";
 import {
   Select,
   SelectContent,
@@ -356,24 +357,32 @@ function AnnualView() {
               <h3 className="mb-4 text-sm font-semibold tracking-tight">
                 Receitas vs Gastos vs Poupado por mês
               </h3>
-              <div className="h-72">
+              <div className="annual-bar-chart h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthly} margin={{ left: -10, right: 8, top: 4, bottom: 4 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
                     <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
-                    <Tooltip
-                      contentStyle={{
-                        background: "var(--popover)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "0.75rem",
-                      }}
-                      formatter={(v) => formatBRL(Number(v))}
-                    />
+                    <Tooltip content={<ChartTooltip />} cursor={false} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="Gastos" fill="var(--destructive)" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="Poupado" fill="var(--savings)" radius={[6, 6, 0, 0]} />
+                    <Bar
+                      dataKey="Receitas"
+                      fill="var(--income)"
+                      radius={[6, 6, 0, 0]}
+                      activeBar={{ stroke: "var(--income)", strokeWidth: 4 }}
+                    />
+                    <Bar
+                      dataKey="Gastos"
+                      fill="var(--destructive)"
+                      radius={[6, 6, 0, 0]}
+                      activeBar={{ stroke: "var(--destructive)", strokeWidth: 4 }}
+                    />
+                    <Bar
+                      dataKey="Poupado"
+                      fill="var(--savings)"
+                      radius={[6, 6, 0, 0]}
+                      activeBar={{ stroke: "var(--savings)", strokeWidth: 4 }}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -452,7 +461,7 @@ function AnnualView() {
                 <h3 className="mb-4 text-sm font-semibold tracking-tight">
                   Top categorias de gasto — mês a mês
                 </h3>
-                <div className="h-72">
+                <div className="annual-bar-chart h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={byCategoryMonthly}
@@ -461,14 +470,7 @@ function AnnualView() {
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
                       <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
-                      <Tooltip
-                        contentStyle={{
-                          background: "var(--popover)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "0.75rem",
-                        }}
-                        formatter={(v) => formatBRL(Number(v))}
-                      />
+                      <Tooltip content={<ChartTooltip />} cursor={false} />
                       <Legend wrapperStyle={{ fontSize: 11 }} />
                       {topCats.map((c, i) => (
                         <Bar
@@ -476,6 +478,10 @@ function AnnualView() {
                           dataKey={c.name}
                           stackId="a"
                           fill={CHART_COLORS[i % CHART_COLORS.length]}
+                          activeBar={{
+                            stroke: CHART_COLORS[i % CHART_COLORS.length],
+                            strokeWidth: 4,
+                          }}
                         />
                       ))}
                     </BarChart>
