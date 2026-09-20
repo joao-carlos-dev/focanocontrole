@@ -63,7 +63,7 @@ export function CategoryChart({ categories, entries }: Props) {
     <div className="grid gap-4 lg:grid-cols-2">
       <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elegant)]">
         <h3 className="mb-3 text-sm font-semibold tracking-tight">Distribuição</h3>
-        <div className="h-64">
+        <div className="category-pie-chart h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -98,7 +98,7 @@ export function CategoryChart({ categories, entries }: Props) {
 
       <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elegant)]">
         <h3 className="mb-3 text-sm font-semibold tracking-tight">Por categoria</h3>
-        <div className="h-64">
+        <div className="annual-bar-chart h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ left: -10, right: 8, top: 4, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
