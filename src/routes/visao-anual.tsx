@@ -365,9 +365,24 @@ function AnnualView() {
                     <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
                     <Tooltip content={<ChartTooltip />} cursor={false} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="Receitas" fill="var(--income)" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="Gastos" fill="var(--destructive)" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="Poupado" fill="var(--savings)" radius={[6, 6, 0, 0]} />
+                    <Bar
+                      dataKey="Receitas"
+                      fill="var(--income)"
+                      radius={[6, 6, 0, 0]}
+                      activeBar={{ stroke: "var(--income)", strokeWidth: 4 }}
+                    />
+                    <Bar
+                      dataKey="Gastos"
+                      fill="var(--destructive)"
+                      radius={[6, 6, 0, 0]}
+                      activeBar={{ stroke: "var(--destructive)", strokeWidth: 4 }}
+                    />
+                    <Bar
+                      dataKey="Poupado"
+                      fill="var(--savings)"
+                      radius={[6, 6, 0, 0]}
+                      activeBar={{ stroke: "var(--savings)", strokeWidth: 4 }}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -463,6 +478,10 @@ function AnnualView() {
                           dataKey={c.name}
                           stackId="a"
                           fill={CHART_COLORS[i % CHART_COLORS.length]}
+                          activeBar={{
+                            stroke: CHART_COLORS[i % CHART_COLORS.length],
+                            strokeWidth: 4,
+                          }}
                         />
                       ))}
                     </BarChart>
