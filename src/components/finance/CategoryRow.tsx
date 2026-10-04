@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { formatBRL } from "@/lib/format";
 import type { Category, Entry, Recurring } from "@/hooks/use-finance";
 import { RecurringDialog } from "./RecurringDialog";
+import { CategoryStylePicker } from "./CategoryStylePicker";
 
 interface Props {
   category: Category;
@@ -434,6 +435,7 @@ export function CategoryRow({
           className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 ${statusHeaderClass}`}
         >
           <div className={`h-2 w-2 rounded-full ${dotColor}`} />
+          <CategoryStylePicker category={category} />
           {subcategories.length > 0 ? (
             expanded ? (
               <ChevronDown className="h-4 w-4 text-muted-foreground" />

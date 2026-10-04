@@ -8,6 +8,13 @@
       "when": 1789301477642,
       "tag": "0000_debt_payments_and_start_month",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791075913932,
+      "tag": "0001_category_color_icon",
+      "breakpoints": true
     }
   ]
 }

@@ -16,9 +16,11 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
+          color: string | null
           created_at: string
           created_by: string | null
           group_id: string | null
+          icon: string | null
           id: string
           kind: string
           name: string
@@ -28,9 +30,11 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          color?: string | null
           created_at?: string
           created_by?: string | null
           group_id?: string | null
+          icon?: string | null
           id?: string
           kind?: string
           name: string
@@ -40,9 +44,11 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          color?: string | null
           created_at?: string
           created_by?: string | null
           group_id?: string | null
+          icon?: string | null
           id?: string
           kind?: string
           name?: string
