@@ -12,6 +12,8 @@ export type Category = {
   group_id: string | null;
   created_by: string | null;
   updated_by: string | null;
+  color?: string | null;
+  icon?: string | null;
 };
 
 export type Entry = {

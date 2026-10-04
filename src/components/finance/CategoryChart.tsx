@@ -45,7 +45,7 @@ export function CategoryChart({ categories, entries }: Props) {
     return Object.entries(totalsByCat)
       .map(([id, total]) => {
         const cat = categories.find((c) => c.id === id);
-        return { name: cat?.name ?? "—", value: total, kind: cat?.kind };
+        return { name: `${cat?.icon ? cat.icon + " " : ""}${cat?.name ?? "—"}`, value: total, kind: cat?.kind, color: cat?.color ?? null };
       })
       .filter((d) => d.value > 0)
       .sort((a, b) => b.value - a.value);
@@ -76,8 +76,8 @@ export function CategoryChart({ categories, entries }: Props) {
                 outerRadius={90}
                 paddingAngle={2}
               >
-                {data.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                {data.map((d, i) => (
+                  <Cell key={i} fill={d.color || COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip
@@ -124,8 +124,8 @@ export function CategoryChart({ categories, entries }: Props) {
                 formatter={(v) => formatBRL(Number(v))}
               />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                {data.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                {data.map((d, i) => (
+                  <Cell key={i} fill={d.color || COLORS[i % COLORS.length]} />
                 ))}
               </Bar>
             </BarChart>
