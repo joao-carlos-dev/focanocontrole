@@ -28,7 +28,11 @@ export function CategoryStylePicker({ category }: { category: Category }) {
     if ("icon" in patch) setIcon(patch.icon ?? null);
     if ("color" in patch) setColor(patch.color ?? null);
     const { error } = await supabase.from("categories").update(patch).eq("id", category.id);
-    if (error) toast.error("Não foi possível salvar o estilo");
+    if (error) {
+      toast.error("Não foi possível salvar o estilo");
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("finance:categories-changed"));
   };
 
   return (

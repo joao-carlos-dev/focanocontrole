@@ -213,6 +213,14 @@ export function useFinance(year: number, month: number) {
     })();
   }, [user, activeGroupId, loadCategories, loadEntries, loadRecurring, applyRecurringIfMissing, loadEditorNames]);
 
+  useEffect(() => {
+    const handler = () => {
+      void loadCategories();
+    };
+    window.addEventListener("finance:categories-changed", handler);
+    return () => window.removeEventListener("finance:categories-changed", handler);
+  }, [loadCategories]);
+
   const syncRecurringAmount = async (
     category_id: string,
     amount: number,
