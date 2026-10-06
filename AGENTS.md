@@ -1,0 +1,1 @@
+- Finance category cards use a two-row mobile layout so labels, values, statuses, and actions remain visible at narrow widths.
