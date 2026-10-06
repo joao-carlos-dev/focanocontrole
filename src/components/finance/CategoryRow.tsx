@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatBRL } from "@/lib/format";
 import type { Category, Entry, Recurring } from "@/hooks/use-finance";
 import { RecurringDialog } from "./RecurringDialog";
@@ -140,19 +141,23 @@ export function CategoryRow({
     if (withDue.length === 0) return null;
     const overdue = withDue
       .filter((e) => !e.paid && getEntryStatus(e) === "overdue")
-      .sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1));
+      .sort((a, b) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
     if (overdue.length > 0) {
+      const firstDueDate = overdue[0]?.due_date;
+      if (!firstDueDate) return null;
       return {
-        text: `Vencida ${formatDueShort(overdue[0].due_date!)}`,
+        text: `Vencida ${formatDueShort(firstDueDate)}`,
         cls: "border-destructive/50 bg-destructive/15 text-destructive",
       };
     }
     const upcoming = withDue
       .filter((e) => !e.paid && getEntryStatus(e) === "upcoming")
-      .sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1));
+      .sort((a, b) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
     if (upcoming.length > 0) {
+      const firstDueDate = upcoming[0]?.due_date;
+      if (!firstDueDate) return null;
       return {
-        text: `Vence ${formatDueShort(upcoming[0].due_date!)}`,
+        text: `Vence ${formatDueShort(firstDueDate)}`,
         cls: "border-warning/50 bg-warning/15 text-warning",
       };
     }
@@ -268,147 +273,181 @@ export function CategoryRow({
         return (
           <div
             key={e.id}
-            className={`flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm ${due?.rowCls ?? "border-transparent bg-background/40"} ${e.paid ? "opacity-80" : ""}`}
+            className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg border px-3 py-2 text-sm sm:flex sm:flex-wrap ${due?.rowCls ?? "border-transparent bg-background/40"} ${e.paid ? "opacity-80" : ""}`}
           >
             {editingId === e.id ? (
               <>
-                <Input
-                  value={editAmount}
-                  onChange={(ev) => setEditAmount(ev.target.value)}
-                  className="h-8 w-24"
-                  inputMode="decimal"
-                />
-                <Input
-                  value={editNote}
-                  onChange={(ev) => setEditNote(ev.target.value)}
-                  placeholder="Nota"
-                  className="h-8 flex-1 min-w-[120px]"
-                />
-                {isExpense && (
+                <div className="min-w-0 space-y-1 sm:w-24 sm:shrink-0">
+                  <Label className="text-[11px] text-muted-foreground sm:sr-only">Valor</Label>
                   <Input
-                    type="date"
-                    value={editDueDate}
-                    onChange={(ev) => setEditDueDate(ev.target.value)}
-                    className="h-8 w-[140px]"
+                    value={editAmount}
+                    onChange={(ev) => setEditAmount(ev.target.value)}
+                    className="h-9 w-full sm:h-8"
+                    inputMode="decimal"
                   />
+                </div>
+                <div className="min-w-0 space-y-1 sm:flex-1">
+                  <Label className="text-[11px] text-muted-foreground sm:sr-only">Nota</Label>
+                  <Input
+                    value={editNote}
+                    onChange={(ev) => setEditNote(ev.target.value)}
+                    placeholder="Nota (opcional)"
+                    className="h-9 w-full sm:h-8"
+                  />
+                </div>
+                {isExpense && (
+                  <div className="col-span-2 min-w-0 space-y-1 sm:w-[150px] sm:shrink-0">
+                    <Label className="text-[11px] text-muted-foreground sm:sr-only">
+                      Data de vencimento
+                    </Label>
+                    <Input
+                      type="date"
+                      value={editDueDate}
+                      onChange={(ev) => setEditDueDate(ev.target.value)}
+                      className="h-9 w-full sm:h-8"
+                      aria-label="Data de vencimento"
+                    />
+                  </div>
                 )}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8"
-                  onClick={() => saveEdit(e.id)}
-                >
-                  <Check className="h-4 w-4 text-primary" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8"
-                  onClick={() => setEditingId(null)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <div className="col-span-2 flex justify-end gap-1 sm:contents">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() => saveEdit(e.id)}
+                    title="Salvar alterações"
+                  >
+                    <Check className="h-4 w-4 text-primary" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() => setEditingId(null)}
+                    title="Cancelar edição"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </>
             ) : (
               <>
-                {isExpense && (
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  {isExpense && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={e.paid ? "secondary" : "outline"}
+                      className="h-7 shrink-0 gap-1 px-2 text-xs"
+                      onClick={() => onTogglePaid(e.id, !e.paid)}
+                      title={e.paid ? "Marcar como não paga" : "Marcar como paga"}
+                    >
+                      {e.paid ? <CircleCheck className="h-3.5 w-3.5" /> : null}
+                      {e.paid ? "Pago" : "Paguei"}
+                    </Button>
+                  )}
+                  <span className={`shrink-0 font-medium ${e.paid ? "line-through" : ""}`}>
+                    {formatBRL(e.amount)}
+                  </span>
+                  {e.note && (
+                    <span className="min-w-0 text-xs text-muted-foreground sm:truncate">— {e.note}</span>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center justify-end gap-1">
                   <Button
-                    type="button"
-                    size="sm"
-                    variant={e.paid ? "secondary" : "outline"}
-                    className="h-7 shrink-0 gap-1 px-2 text-xs"
-                    onClick={() => onTogglePaid(e.id, !e.paid)}
-                    title={e.paid ? "Marcar como não paga" : "Marcar como paga"}
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7"
+                    onClick={() => startEdit(e)}
+                    title="Editar lançamento"
                   >
-                    {e.paid ? <CircleCheck className="h-3.5 w-3.5" /> : null}
-                    {e.paid ? "Pago" : "Paguei"}
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                )}
-                <span className={`font-medium ${e.paid ? "line-through" : ""}`}>
-                  {formatBRL(e.amount)}
-                </span>
-                {e.note && (
-                  <span className="truncate text-xs text-muted-foreground">— {e.note}</span>
-                )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 text-destructive hover:text-destructive"
+                    onClick={() => onDeleteEntry(e.id)}
+                    title="Excluir lançamento"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
                 {due && (
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${due.cls}`}
+                    className={`col-span-2 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${due.cls}`}
                   >
                     <CalendarIcon className="h-3 w-3" />
-                    <span>{due.status}</span>
                     {due.text}
                   </span>
                 )}
                 {personLabel(e.updated_by || e.created_by) && (
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="col-span-2 text-[11px] text-muted-foreground">
                     Editado por {personLabel(e.updated_by || e.created_by)}
                   </span>
                 )}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="ml-auto h-7 w-7"
-                  onClick={() => startEdit(e)}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7 text-destructive hover:text-destructive"
-                  onClick={() => onDeleteEntry(e.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
               </>
             )}
           </div>
         );
       })}
       {adding === catId ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-background/60 px-2 py-1.5">
-          <Input
-            autoFocus
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0,00"
-            inputMode="decimal"
-            className="h-8 w-24"
-            onKeyDown={(e) => e.key === "Enter" && handleAdd(catId)}
-          />
-          <Input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Nota (opcional)"
-            className="h-8 flex-1 min-w-[120px]"
-            onKeyDown={(e) => e.key === "Enter" && handleAdd(catId)}
-          />
-          {isExpense && (
+        <div className="grid grid-cols-2 items-end gap-2 rounded-lg border border-primary/40 bg-background/60 p-2 sm:flex sm:flex-wrap sm:items-center">
+          <div className="min-w-0 space-y-1 sm:w-24 sm:shrink-0">
+            <Label className="text-[11px] text-muted-foreground sm:sr-only">Valor</Label>
             <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="h-8 w-[140px]"
-              title="Data de vencimento"
+              autoFocus
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0,00"
+              inputMode="decimal"
+              className="h-9 w-full sm:h-8"
+              onKeyDown={(e) => e.key === "Enter" && handleAdd(catId)}
             />
+          </div>
+          <div className="min-w-0 space-y-1 sm:flex-1">
+            <Label className="text-[11px] text-muted-foreground sm:sr-only">Nota</Label>
+            <Input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Nota (opcional)"
+              className="h-9 w-full sm:h-8"
+              onKeyDown={(e) => e.key === "Enter" && handleAdd(catId)}
+            />
+          </div>
+          {isExpense && (
+            <div className="col-span-2 min-w-0 space-y-1 sm:w-[150px] sm:shrink-0">
+              <Label className="text-[11px] text-muted-foreground sm:sr-only">
+                Data de vencimento
+              </Label>
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="h-9 w-full sm:h-8"
+                aria-label="Data de vencimento"
+              />
+            </div>
           )}
-          <Button size="sm" className="h-8" onClick={() => handleAdd(catId)}>
-            Salvar
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            onClick={() => {
-              setAdding(null);
-              setAmount("");
-              setNote("");
-              setDueDate("");
-              
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="col-span-2 flex justify-end gap-2 sm:contents">
+            <Button size="sm" className="h-9 sm:h-8" onClick={() => handleAdd(catId)}>
+              Salvar
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-9 w-9 sm:h-8 sm:w-8"
+              title="Cancelar"
+              onClick={() => {
+                setAdding(null);
+                setAmount("");
+                setNote("");
+                setDueDate("");
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
       ) : (
@@ -430,28 +469,38 @@ export function CategoryRow({
       <div
         className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}
       >
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setExpanded((v) => !v)}
-          className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 ${statusHeaderClass}`}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setExpanded((value) => !value);
+            }
+          }}
+          className={`grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-3 py-3 text-left transition-colors hover:bg-muted/40 sm:flex sm:items-center sm:gap-3 sm:px-4 ${statusHeaderClass}`}
         >
-          <div className={`h-2 w-2 rounded-full ${dotColor}`} />
-          <CategoryStylePicker category={category} />
-          {subcategories.length > 0 ? (
-            expanded ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          <div className="flex min-w-0 items-center gap-2 sm:contents">
+            <div className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
+            <CategoryStylePicker category={category} />
+            {subcategories.length > 0 ? (
+              expanded ? (
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+              )
             ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )
-          ) : (
-            <div className="w-4" />
-          )}
-          <div className="min-w-0 flex-1">
+              <div className="hidden w-4 sm:block" />
+            )}
+          </div>
+          <div className="min-w-0 self-center sm:flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="truncate font-semibold tracking-tight">{category.name}</span>
+              <span className="min-w-0 break-words font-semibold tracking-tight sm:truncate">{category.name}</span>
               {isPinned && (
                 <span
                   title="Conta fixa mensal"
-                  className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-primary"
+                  className="hidden shrink-0 items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-primary sm:inline-flex"
                 >
                   <Pin className="h-2.5 w-2.5" /> fixo
                 </span>
@@ -464,65 +513,68 @@ export function CategoryRow({
               <div className="text-[10px] uppercase tracking-wider text-income">Receita</div>
             )}
           </div>
-          {headerDueInfo && (
-            <span
-              className={`hidden sm:inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${headerDueInfo.cls}`}
-            >
-              <CalendarIcon className="h-3 w-3" />
-              {headerDueInfo.text}
-            </span>
-          )}
-          <div className={`text-base font-bold tabular-nums ${accentColor}`}>
-            {formatBRL(total)}
-          </div>
-          {subcategories.length === 0 && isExpense && (
-            <label
-              className="flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-muted-foreground select-none"
-              onClick={(e) => e.stopPropagation()}
-              title="Recorrente — repetir nos próximos meses"
-            >
-              <input
-                type="checkbox"
-                checked={isPinned}
-                onChange={(e) => toggleRecurring(category, e.target.checked)}
-                className="h-3.5 w-3.5 cursor-pointer accent-primary"
-              />
-              <span className="hidden sm:inline">Recorrente</span>
-            </label>
-          )}
-          {subcategories.length === 0 && (
+          <div className="col-span-2 flex min-w-0 items-center gap-2 border-t border-border/50 pt-2 sm:contents sm:border-0 sm:pt-0">
+            {headerDueInfo && (
+              <span
+                className={`inline-flex min-w-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${headerDueInfo.cls}`}
+              >
+                <CalendarIcon className="h-3 w-3 shrink-0" />
+                <span className="truncate">{headerDueInfo.text}</span>
+              </span>
+            )}
+            <div className={`ml-auto shrink-0 text-sm font-bold tabular-nums sm:text-base ${accentColor}`}>
+              {formatBRL(total)}
+            </div>
+            {subcategories.length === 0 && isExpense && (
+              <label
+                className="flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-muted-foreground select-none"
+                onClick={(e) => e.stopPropagation()}
+                title="Recorrente — repetir nos próximos meses"
+              >
+                <input
+                  type="checkbox"
+                  checked={isPinned}
+                  onChange={(e) => toggleRecurring(category, e.target.checked)}
+                  className="h-4 w-4 cursor-pointer accent-primary"
+                  aria-label="Conta recorrente"
+                />
+                <span className="hidden sm:inline">Recorrente</span>
+              </label>
+            )}
+            {subcategories.length === 0 && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className={`h-8 w-8 shrink-0 sm:h-7 sm:w-7 ${isPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setRecurringFor(category);
+                }}
+                title={isPinned ? "Editar conta fixa" : "Marcar como conta fixa"}
+              >
+                {isPinned ? (
+                  <Pin className="h-3.5 w-3.5 fill-current" />
+                ) : (
+                  <PinOff className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            )}
             <Button
               size="icon"
               variant="ghost"
-              className={`h-7 w-7 ${isPinned ? "text-primary" : "text-muted-foreground"} hover:text-primary`}
+              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive sm:h-7 sm:w-7"
               onClick={(e) => {
                 e.stopPropagation();
-                setRecurringFor(category);
+                if (confirm(`Excluir os lançamentos de "${category.name}" apenas deste mês?`)) {
+                  onDeleteCategory(category.id);
+                }
               }}
-              title={isPinned ? "Editar conta fixa" : "Marcar como conta fixa"}
+              title="Excluir lançamentos deste mês"
             >
-              {isPinned ? (
-                <Pin className="h-3.5 w-3.5 fill-current" />
-              ) : (
-                <PinOff className="h-3.5 w-3.5" />
-              )}
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
-          )}
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (confirm(`Excluir os lançamentos de "${category.name}" apenas deste mês?`)) {
-                onDeleteCategory(category.id);
-              }
-            }}
-            title="Excluir lançamentos deste mês"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
-        </button>
+          </div>
+        </div>
 
         {expanded && (
           <div className="border-t border-border bg-background/30 p-3">
@@ -537,13 +589,16 @@ export function CategoryRow({
                   const subPinned = !!recurringForCat(sub.id);
                   return (
                     <div key={sub.id} className="rounded-xl border border-border/60 bg-card/60 p-3">
-                      <div className="mb-2 flex items-center gap-2">
+                      <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex">
+                        <div className="flex min-w-0 items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-accent" />
-                        <span className="text-sm font-medium">{sub.name}</span>
+                        <span className="min-w-0 break-words text-sm font-medium">{sub.name}</span>
                         {subPinned && <Pin className="h-3 w-3 fill-current text-primary" />}
-                        <span className="ml-auto text-sm font-semibold tabular-nums">
+                        </div>
+                        <span className="text-sm font-semibold tabular-nums sm:ml-auto">
                           {formatBRL(subTotal)}
                         </span>
+                        <div className="col-span-2 flex items-center justify-end gap-1 border-t border-border/50 pt-2 sm:contents sm:border-0 sm:pt-0">
                         {sub.kind === "expense" && (
                           <label
                             className="flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-muted-foreground select-none"
@@ -584,6 +639,7 @@ export function CategoryRow({
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
+                        </div>
                       </div>
                       {renderEntries(sub.id, subList)}
                     </div>
