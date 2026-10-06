@@ -479,7 +479,7 @@ export function CategoryRow({
               setExpanded((value) => !value);
             }
           }}
-          className={`grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-3 py-3 text-left transition-colors hover:bg-muted/40 sm:flex sm:items-center sm:gap-3 sm:px-4 ${statusHeaderClass}`}
+          className={`grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 px-3 py-3 text-left transition-colors hover:bg-muted/40 sm:flex sm:items-center sm:gap-3 sm:px-4 ${statusHeaderClass}`}
         >
           <div className="flex min-w-0 items-center gap-2 sm:contents">
             <div className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
