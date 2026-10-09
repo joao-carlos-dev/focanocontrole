@@ -23,7 +23,8 @@ export function SummaryCards({
   totalDebts,
   debtPayments,
 }: Props) {
-  const balance = totalIncome - totalExpense - totalSavings - debtPayments;
+  // Investimentos (poupado) não reduzem o saldo do mês — é dinheiro guardado, não gasto.
+  const balance = totalIncome - totalExpense - debtPayments;
   const cards = [
     {
       label: "Receitas",
