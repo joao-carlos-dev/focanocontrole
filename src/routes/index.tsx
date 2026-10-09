@@ -4,12 +4,14 @@ import { Wallet, BarChart3, User as UserIcon, LogOut } from "lucide-react";
 import { useFinance } from "@/hooks/use-finance";
 import { useAuth } from "@/hooks/use-auth";
 import { useDebts } from "@/hooks/use-debts";
+import { useReceivables } from "@/hooks/use-receivables";
 import { MonthSelector } from "@/components/finance/MonthSelector";
 import { SummaryCards } from "@/components/finance/SummaryCards";
 import { CategoryChart } from "@/components/finance/CategoryChart";
 import { CategoryRow } from "@/components/finance/CategoryRow";
 import { AddCategoryDialog } from "@/components/finance/AddCategoryDialog";
 import { DebtsSection } from "@/components/finance/DebtsSection";
+import { ReceivablesSection } from "@/components/finance/ReceivablesSection";
 import { Button } from "@/components/ui/button";
 
 
@@ -60,6 +62,9 @@ function Dashboard() {
     year,
     month,
   );
+
+  const { total: totalReceivables, monthPaymentsTotal: receivedPayments } =
+    useReceivables(year, month);
 
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
 
@@ -182,6 +187,8 @@ function Dashboard() {
           totalSavings={totalSavings}
           totalDebts={totalDebts}
           debtPayments={debtPayments}
+          totalReceivables={totalReceivables}
+          receivedPayments={receivedPayments}
         />
 
 
@@ -283,6 +290,8 @@ function Dashboard() {
         </section>
 
         <DebtsSection year={year} month={month} />
+
+        <ReceivablesSection year={year} month={month} />
 
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Dados sincronizados na nuvem ✨
