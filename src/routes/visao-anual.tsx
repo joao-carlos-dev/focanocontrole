@@ -118,7 +118,7 @@ function AnnualView() {
         Poupado: savings,
         Dívidas: debtTotalAt(year, m),
         "Pago em dívidas": debtsPaid,
-        Saldo: income - expense - savings - debtsPaid,
+        Saldo: income - expense - debtsPaid,
       };
     });
 
@@ -179,7 +179,7 @@ function AnnualView() {
   }, [entries, categories, year, debtPayments, debtTotalAt]);
 
   const balance =
-    totals.income - totals.expense - totals.savings - totals.debtsPaid;
+    totals.income - totals.expense - totals.debtsPaid;
   const yearOptions = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
 
   const summary = [
