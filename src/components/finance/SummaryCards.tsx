@@ -14,6 +14,8 @@ interface Props {
   totalSavings: number;
   totalDebts: number;
   debtPayments: number;
+  totalReceivables: number;
+  receivedPayments: number;
 }
 
 export function SummaryCards({
@@ -22,9 +24,12 @@ export function SummaryCards({
   totalSavings,
   totalDebts,
   debtPayments,
+  totalReceivables,
+  receivedPayments,
 }: Props) {
   // Investimentos (poupado) não reduzem o saldo do mês — é dinheiro guardado, não gasto.
-  const balance = totalIncome - totalExpense - debtPayments;
+  // Valores recebidos de empréstimos entram no saldo do mês em que foram recebidos.
+  const balance = totalIncome - totalExpense - debtPayments + receivedPayments;
   const cards = [
     {
       label: "Receitas",
@@ -68,10 +73,17 @@ export function SummaryCards({
       accent: "from-destructive/20 to-warning/10",
       iconColor: "text-destructive",
     },
+    {
+      label: "A receber",
+      value: totalReceivables,
+      icon: HandCoins,
+      accent: "from-income/20 to-accent/10",
+      iconColor: "text-income",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
       {cards.map((c) => (
         <div
           key={c.label}

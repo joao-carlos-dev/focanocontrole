@@ -394,6 +394,116 @@ export type Database = {
         }
         Relationships: []
       }
+      receivable_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          group_id: string | null
+          id: string
+          month: number
+          note: string | null
+          payment_date: string
+          receivable_id: string
+          user_id: string | null
+          year: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          group_id?: string | null
+          id?: string
+          month: number
+          note?: string | null
+          payment_date?: string
+          receivable_id: string
+          user_id?: string | null
+          year: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          group_id?: string | null
+          id?: string
+          month?: number
+          note?: string | null
+          payment_date?: string
+          receivable_id?: string
+          user_id?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receivable_payments_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "family_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receivable_payments_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "receivables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receivables: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          description: string
+          group_id: string | null
+          id: string
+          sort_order: number
+          start_month: number | null
+          start_year: number | null
+          updated_at: string
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description: string
+          group_id?: string | null
+          id?: string
+          sort_order?: number
+          start_month?: number | null
+          start_year?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          group_id?: string | null
+          id?: string
+          sort_order?: number
+          start_month?: number | null
+          start_year?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receivables_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "family_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurring_amounts: {
         Row: {
           active: boolean
