@@ -63,8 +63,9 @@ function Dashboard() {
     month,
   );
 
+  const receivablesFinance = useReceivables(year, month);
   const { total: totalReceivables, monthPaymentsTotal: receivedPayments } =
-    useReceivables(year, month);
+    receivablesFinance;
 
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
 
@@ -291,7 +292,7 @@ function Dashboard() {
 
         <DebtsSection year={year} month={month} />
 
-        <ReceivablesSection year={year} month={month} />
+        <ReceivablesSection year={year} month={month} finance={receivablesFinance} />
 
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Dados sincronizados na nuvem ✨

@@ -83,7 +83,7 @@ export function SummaryCards({
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+    <div aria-label="Resumo financeiro" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {cards.map((c) => (
         <div
           key={c.label}
@@ -92,16 +92,16 @@ export function SummaryCards({
           <div
             className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${c.accent} opacity-60`}
           />
-          <div className="relative flex items-start justify-between">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+            <div className="min-w-0">
+              <div className="text-xs font-medium uppercase text-muted-foreground">
                 {c.label}
               </div>
-              <div className="mt-1.5 text-base font-bold tracking-tight sm:text-lg">
+              <div className="mt-1.5 break-words text-base font-bold tabular-nums sm:text-lg">
                 {formatBRL(c.value)}
               </div>
             </div>
-            <div className={`rounded-xl bg-background/60 p-2 ${c.iconColor}`}>
+            <div className={`shrink-0 rounded-xl bg-background/60 p-2 ${c.iconColor}`}>
               <c.icon className="h-5 w-5" />
             </div>
           </div>

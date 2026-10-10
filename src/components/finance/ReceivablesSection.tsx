@@ -16,9 +16,10 @@ import { useReceivables } from "@/hooks/use-receivables";
 interface Props {
   year: number;
   month: number;
+  finance: ReturnType<typeof useReceivables>;
 }
 
-export function ReceivablesSection({ year, month }: Props) {
+export function ReceivablesSection({ year, month, finance }: Props) {
   const {
     receivables,
     total,
@@ -31,7 +32,7 @@ export function ReceivablesSection({ year, month }: Props) {
     monthPayments,
     monthPaymentsTotal,
     balanceAt,
-  } = useReceivables(year, month);
+  } = finance;
   const [adding, setAdding] = useState(false);
   const [newDesc, setNewDesc] = useState("");
   const [newAmount, setNewAmount] = useState("");

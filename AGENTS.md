@@ -1,1 +1,2 @@
 - Finance category cards use a two-row mobile layout so labels, values, statuses, and actions remain visible at narrow widths.
+- The dashboard owns receivable state and passes it to the editing section so summary totals and mutations share a single source of truth.
