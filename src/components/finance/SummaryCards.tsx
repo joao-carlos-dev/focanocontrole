@@ -27,9 +27,9 @@ export function SummaryCards({
   totalReceivables,
   receivedPayments,
 }: Props) {
-  // Investimentos (poupado) não reduzem o saldo do mês — é dinheiro guardado, não gasto.
-  // Valores recebidos de empréstimos entram no saldo do mês em que foram recebidos.
-  const balance = totalIncome - totalExpense - debtPayments + receivedPayments;
+  // Investimentos (poupado) e valores a receber não alteram o saldo do mês —
+  // só receitas, gastos e pagamentos de dívidas entram no cálculo.
+  const balance = totalIncome - totalExpense - debtPayments;
   const cards = [
     {
       label: "Receitas",

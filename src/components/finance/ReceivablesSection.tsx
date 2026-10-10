@@ -115,9 +115,8 @@ export function ReceivablesSection({ year, month, finance }: Props) {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          O saldo a receber não altera o saldo do mês. Só os valores que você
-          registrar como recebidos entram no saldo — e apenas no mês em que
-          foram recebidos.
+          Esta seção é apenas um controle do dinheiro emprestado. Nenhum valor
+          aqui entra na receita ou nos gastos do mês, nem no saldo.
         </p>
 
         {adding && (
