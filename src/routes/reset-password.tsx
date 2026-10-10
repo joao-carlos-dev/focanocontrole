@@ -12,6 +12,10 @@ export const Route = createFileRoute("/reset-password")({
     meta: [
       { title: "Redefinir senha - Controle Financeiro Familiar" },
       { name: "description", content: "Crie uma nova senha para sua conta." },
+      { property: "og:title", content: "Redefinir senha - Controle Financeiro Familiar" },
+      { property: "og:description", content: "Crie uma nova senha para sua conta." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ResetPasswordPage,

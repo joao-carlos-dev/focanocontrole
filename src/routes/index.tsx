@@ -19,11 +19,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Controle Financeiro Familiar" },
-      {
-        name: "description",
-        content:
-          "Dashboard de controle de gastos e poupança da família, simples e editável.",
-      },
+      { name: "description", content: "Acompanhe receitas, gastos, investimentos, dívidas e valores a receber da família." },
+      { property: "og:title", content: "Controle Financeiro Familiar" },
+      { property: "og:description", content: "Acompanhe receitas, gastos, investimentos, dívidas e valores a receber da família." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Dashboard,
