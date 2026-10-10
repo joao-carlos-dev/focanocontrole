@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-  ChevronDown,
   ChevronRight,
+
   Plus,
   Trash2,
   Pencil,
@@ -467,11 +467,14 @@ export function CategoryRow({
   return (
     <>
       <div
-        className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}
+        className={`group/category overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}
       >
+
         <div
           role="button"
           tabIndex={0}
+          aria-expanded={expanded}
+          aria-label={`${category.name} — ${expanded ? "recolher" : "expandir"} lançamentos`}
           onClick={() => setExpanded((v) => !v)}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -484,16 +487,17 @@ export function CategoryRow({
           <div className="flex min-w-0 items-center gap-2 sm:contents">
             <div className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
             <CategoryStylePicker category={category} />
-            {subcategories.length > 0 ? (
-              expanded ? (
-                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-              )
-            ) : (
-              <div className="hidden w-4 sm:block" />
-            )}
+            <span
+              aria-hidden="true"
+              title={expanded ? "Recolher" : "Expandir lançamentos"}
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/70 text-muted-foreground transition-transform duration-200 group-hover/category:border-primary/50 group-hover/category:text-foreground ${
+                expanded ? "rotate-90" : ""
+              }`}
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </span>
           </div>
+
           <div className="min-w-0 self-center sm:flex-1">
             <div className="flex items-center gap-1.5">
               <span className="min-w-0 break-words font-semibold tracking-tight sm:truncate">{category.name}</span>
