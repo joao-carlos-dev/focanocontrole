@@ -467,8 +467,9 @@ export function CategoryRow({
   return (
     <>
       <div
-        className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}
+        className={`group/category overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-elegant)] ${statusCardClass}`}
       >
+
         <div
           role="button"
           tabIndex={0}
