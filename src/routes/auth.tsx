@@ -15,6 +15,10 @@ export const Route = createFileRoute("/auth")({
     meta: [
       { title: "Entrar - Controle Financeiro Familiar" },
       { name: "description", content: "Entre ou cadastre-se para gerenciar suas finanças." },
+      { property: "og:title", content: "Entrar - Controle Financeiro Familiar" },
+      { property: "og:description", content: "Entre ou cadastre-se para gerenciar suas finanças." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,

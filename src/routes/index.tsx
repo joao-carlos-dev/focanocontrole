@@ -19,11 +19,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Controle Financeiro Familiar" },
-      {
-        name: "description",
-        content:
-          "Dashboard de controle de gastos e poupança da família, simples e editável.",
-      },
+      { name: "description", content: "Acompanhe receitas, gastos, investimentos, dívidas e valores a receber da família." },
+      { property: "og:title", content: "Controle Financeiro Familiar" },
+      { property: "og:description", content: "Acompanhe receitas, gastos, investimentos, dívidas e valores a receber da família." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Dashboard,
@@ -63,8 +63,9 @@ function Dashboard() {
     month,
   );
 
+  const receivablesFinance = useReceivables(year, month);
   const { total: totalReceivables, monthPaymentsTotal: receivedPayments } =
-    useReceivables(year, month);
+    receivablesFinance;
 
   const { rootExpenses, savings, incomes, totalExpense, totalSavings, totalIncome } = useMemo(() => {
 
@@ -291,7 +292,7 @@ function Dashboard() {
 
         <DebtsSection year={year} month={month} />
 
-        <ReceivablesSection year={year} month={month} />
+        <ReceivablesSection year={year} month={month} finance={receivablesFinance} />
 
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Dados sincronizados na nuvem ✨

@@ -40,11 +40,11 @@ export const Route = createFileRoute("/visao-anual")({
   head: () => ({
     meta: [
       { title: "Visão Anual — Finanças da Família" },
-      {
-        name: "description",
-        content:
-          "Visão global dos gastos, receitas e poupança ao longo dos meses do ano.",
-      },
+      { name: "description", content: "Compare receitas, gastos, investimentos e dívidas ao longo do ano." },
+      { property: "og:title", content: "Visão Anual — Finanças da Família" },
+      { property: "og:description", content: "Compare receitas, gastos, investimentos e dívidas ao longo do ano." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AnnualView,
