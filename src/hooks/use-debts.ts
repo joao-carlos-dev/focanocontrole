@@ -146,7 +146,9 @@ export function useDebts(year?: number, month?: number) {
         ...prev,
         { ...(data as any), amount: Number((data as any).amount) },
       ]);
+    return data ? (data as any).id : null;
   };
+
 
   const updateDebt = async (id: string, description: string, amount: number) => {
     const { data } = await db()

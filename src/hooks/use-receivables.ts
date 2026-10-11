@@ -144,7 +144,9 @@ export function useReceivables(year?: number, month?: number) {
         ...prev,
         { ...(data as any), amount: Number((data as any).amount) },
       ]);
+    return data ? (data as any).id : null;
   };
+
 
   const updateReceivable = async (
     id: string,
