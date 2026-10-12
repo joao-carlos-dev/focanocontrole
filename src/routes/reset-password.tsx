@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Wallet } from "lucide-react";
+import logoAsset from "@/assets/foca-controle-logo.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,9 +52,11 @@ function ResetPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-3">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[image:var(--gradient-primary)] shadow-[var(--shadow-glow)]">
-            <Wallet className="h-7 w-7 text-primary-foreground" />
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="Foca no Controle"
+            className="mx-auto h-16 w-16 rounded-full object-cover shadow-[var(--shadow-glow)] ring-1 ring-white/10"
+          />
           <h1 className="text-2xl font-bold tracking-tight">Redefinir senha</h1>
           <p className="text-sm text-muted-foreground">Digite sua nova senha de acesso</p>
         </div>
