@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Wallet, BarChart3, User as UserIcon, LogOut } from "lucide-react";
+import { BarChart3, User as UserIcon, LogOut } from "lucide-react";
+import logoAsset from "@/assets/foca-controle-logo.png.asset.json";
 import { useFinance } from "@/hooks/use-finance";
 import { useAuth } from "@/hooks/use-auth";
 import { useDebts } from "@/hooks/use-debts";
@@ -135,9 +136,11 @@ function Dashboard() {
         {/* Header */}
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[image:var(--gradient-primary)] shadow-[var(--shadow-glow)]">
-              <Wallet className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img
+              src={logoAsset.url}
+              alt="Foca no Controle"
+              className="h-11 w-11 shrink-0 rounded-full object-cover shadow-[var(--shadow-glow)] ring-1 ring-white/10"
+            />
             <div>
               <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
                 Finanças da família
