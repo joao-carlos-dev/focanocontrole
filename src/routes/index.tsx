@@ -19,9 +19,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Controle Financeiro Familiar" },
+      { title: "Foca no Controle" },
       { name: "description", content: "Acompanhe receitas, gastos, investimentos, dívidas e valores a receber da família." },
-      { property: "og:title", content: "Controle Financeiro Familiar" },
+      { property: "og:title", content: "Foca no Controle" },
       { property: "og:description", content: "Acompanhe receitas, gastos, investimentos, dívidas e valores a receber da família." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -143,7 +143,7 @@ function Dashboard() {
             />
             <div>
               <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-                Finanças da família
+                Foca no Controle
               </h1>
               <p className="text-xs text-muted-foreground">
                 Acompanhe gastos e poupança mês a mês

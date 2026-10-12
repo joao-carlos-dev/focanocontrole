@@ -31,14 +31,15 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Finanças da família" },
+      { title: "Foca no Controle" },
       { name: "description", content: "Controle financeiro familiar de receitas, gastos e investimentos." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Finanças da família" },
+      { property: "og:title", content: "Foca no Controle" },
+      { property: "og:site_name", content: "Foca no Controle" },
       { property: "og:description", content: "Controle financeiro familiar de receitas, gastos e investimentos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Finanças da família" },
+      { name: "twitter:title", content: "Foca no Controle" },
       { name: "twitter:description", content: "Controle financeiro familiar de receitas, gastos e investimentos." },
     ],
     links: [

@@ -13,9 +13,9 @@ import { useAuth } from "@/hooks/use-auth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar - Controle Financeiro Familiar" },
+      { title: "Entrar - Foca no Controle" },
       { name: "description", content: "Entre ou cadastre-se para gerenciar suas finanças." },
-      { property: "og:title", content: "Entrar - Controle Financeiro Familiar" },
+      { property: "og:title", content: "Entrar - Foca no Controle" },
       { property: "og:description", content: "Entre ou cadastre-se para gerenciar suas finanças." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -123,7 +123,7 @@ function AuthPage() {
             alt="Foca no Controle"
             className="mx-auto h-16 w-16 rounded-full object-cover shadow-[var(--shadow-glow)] ring-1 ring-white/10"
           />
-          <h1 className="text-2xl font-bold tracking-tight">Finanças da família</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Foca no Controle</h1>
           <p className="text-sm text-muted-foreground">Entre para acessar seu painel</p>
         </div>
 

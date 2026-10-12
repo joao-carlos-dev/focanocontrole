@@ -39,9 +39,9 @@ import { useDebts } from "@/hooks/use-debts";
 export const Route = createFileRoute("/visao-anual")({
   head: () => ({
     meta: [
-      { title: "Visão Anual — Finanças da Família" },
+      { title: "Visão Anual — Foca no Controle" },
       { name: "description", content: "Compare receitas, gastos, investimentos e dívidas ao longo do ano." },
-      { property: "og:title", content: "Visão Anual — Finanças da Família" },
+      { property: "og:title", content: "Visão Anual — Foca no Controle" },
       { property: "og:description", content: "Compare receitas, gastos, investimentos e dívidas ao longo do ano." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
