@@ -10,9 +10,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Redefinir senha - Controle Financeiro Familiar" },
+      { title: "Redefinir senha - Foca no Controle" },
       { name: "description", content: "Crie uma nova senha para sua conta." },
-      { property: "og:title", content: "Redefinir senha - Controle Financeiro Familiar" },
+      { property: "og:title", content: "Redefinir senha - Foca no Controle" },
       { property: "og:description", content: "Crie uma nova senha para sua conta." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

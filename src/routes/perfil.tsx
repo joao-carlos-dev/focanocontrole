@@ -14,9 +14,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/perfil")({
   head: () => ({
     meta: [
-      { title: "Perfil - Controle Financeiro Familiar" },
+      { title: "Perfil - Foca no Controle" },
       { name: "description", content: "Gerencie seu perfil, preferências de avisos e compartilhamento familiar." },
-      { property: "og:title", content: "Perfil - Controle Financeiro Familiar" },
+      { property: "og:title", content: "Perfil - Foca no Controle" },
       { property: "og:description", content: "Gerencie seu perfil, preferências de avisos e compartilhamento familiar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
