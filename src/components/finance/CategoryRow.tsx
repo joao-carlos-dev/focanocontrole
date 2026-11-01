@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { formatBRL } from "@/lib/format";
 import type { Category, Entry, Recurring } from "@/hooks/use-finance";
@@ -172,7 +173,7 @@ export function CategoryRow({
   })();
 
   const handleAdd = async (catId: string) => {
-    const v = parseFloat(amount.replace(",", "."));
+    const v = parseFloat(amount);
     if (isNaN(v) || v <= 0) return;
     await onAddEntry(catId, v, note, dueDate || null);
     setAmount("");
@@ -209,7 +210,7 @@ export function CategoryRow({
   };
 
   const saveEdit = async (id: string) => {
-    const v = parseFloat(editAmount.replace(",", "."));
+    const v = parseFloat(editAmount);
     if (isNaN(v) || v < 0) return;
     await onUpdateEntry(id, v, editNote, editDueDate || null);
     setEditingId(null);
@@ -279,9 +280,9 @@ export function CategoryRow({
               <>
                 <div className="min-w-0 space-y-1 sm:w-24 sm:shrink-0">
                   <Label className="text-[11px] text-muted-foreground sm:sr-only">Valor</Label>
-                  <Input
+                  <MoneyInput
                     value={editAmount}
-                    onChange={(ev) => setEditAmount(ev.target.value)}
+                    onValueChange={setEditAmount}
                     className="h-9 w-full sm:h-8"
                     inputMode="decimal"
                   />
@@ -395,10 +396,10 @@ export function CategoryRow({
         <div className="grid grid-cols-2 items-end gap-2 rounded-lg border border-primary/40 bg-background/60 p-2 sm:flex sm:flex-wrap sm:items-center">
           <div className="min-w-0 space-y-1 sm:w-24 sm:shrink-0">
             <Label className="text-[11px] text-muted-foreground sm:sr-only">Valor</Label>
-            <Input
+            <MoneyInput
               autoFocus
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
               placeholder="0,00"
               inputMode="decimal"
               className="h-9 w-full sm:h-8"
