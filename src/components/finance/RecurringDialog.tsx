@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import type { Recurring } from "@/hooks/use-finance";
 
@@ -43,14 +44,14 @@ export function RecurringDialog({
 
   useEffect(() => {
     if (open) {
-      setAmount(current ? String(current.amount).replace(".", ",") : "");
+      setAmount(current ? String(current.amount) : "");
       setNote(current?.note ?? "");
       setDueDay(current?.due_day ? String(current.due_day) : "");
     }
   }, [open, current]);
 
   const save = async () => {
-    const v = parseFloat(amount.replace(",", "."));
+    const v = parseFloat(amount);
     if (isNaN(v) || v < 0) return;
     let day: number | null = null;
     if (dueDay.trim()) {
@@ -83,10 +84,10 @@ export function RecurringDialog({
         <div className="space-y-4 py-2">
           <div className="space-y-2">
             <Label>Valor mensal (R$)</Label>
-            <Input
+            <MoneyInput
               autoFocus
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
               placeholder="0,00"
               inputMode="decimal"
               onKeyDown={(e) => e.key === "Enter" && save()}

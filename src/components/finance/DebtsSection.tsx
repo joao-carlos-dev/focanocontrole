@@ -12,6 +12,7 @@ import {
 import { formatBRL, MONTHS_PT } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { useDebts } from "@/hooks/use-debts";
 
 interface Props {
@@ -43,7 +44,7 @@ export function DebtsSection({ year, month }: Props) {
   const [payingId, setPayingId] = useState<string | null>(null);
   const [payValue, setPayValue] = useState("");
 
-  const parse = (v: string) => Number(v.replace(/\./g, "").replace(",", ".")) || 0;
+  const parse = (v: string) => Number(v) || 0;
 
   const submitNew = async () => {
     if (!newDesc.trim()) return;
@@ -58,7 +59,7 @@ export function DebtsSection({ year, month }: Props) {
     setEditingId(id);
     setExpandedId(id);
     setEditDesc(desc);
-    setEditAmount(String(amount).replace(".", ","));
+    setEditAmount(String(amount));
   };
 
   const submitEdit = async () => {
@@ -132,11 +133,11 @@ export function DebtsSection({ year, month }: Props) {
               onChange={(e) => setNewDesc(e.target.value)}
               className="rounded-xl"
             />
-            <Input
+            <MoneyInput
               placeholder="0,00"
               inputMode="decimal"
               value={newAmount}
-              onChange={(e) => setNewAmount(e.target.value)}
+              onValueChange={setNewAmount}
               className="rounded-xl sm:w-36"
               onKeyDown={(e) => {
                 if (e.key === "Enter") submitNew();
@@ -232,10 +233,10 @@ export function DebtsSection({ year, month }: Props) {
                             className="rounded-xl"
                             placeholder="Descrição"
                           />
-                          <Input
+                          <MoneyInput
                             value={editAmount}
                             inputMode="decimal"
-                            onChange={(e) => setEditAmount(e.target.value)}
+                            onValueChange={setEditAmount}
                             className="rounded-xl sm:w-32"
                             placeholder="0,00"
                             onKeyDown={(e) => {
@@ -303,12 +304,12 @@ export function DebtsSection({ year, month }: Props) {
                           <span className="text-xs text-muted-foreground">
                             Valor pago em {MONTHS_PT[month - 1]}:
                           </span>
-                          <Input
+                          <MoneyInput
                             autoFocus
                             placeholder="0,00"
                             inputMode="decimal"
                             value={payValue}
-                            onChange={(e) => setPayValue(e.target.value)}
+                            onValueChange={setPayValue}
                             className="rounded-xl sm:w-36"
                             onKeyDown={(e) => {
                               if (e.key === "Enter") submitPay();

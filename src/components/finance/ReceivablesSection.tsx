@@ -12,6 +12,7 @@ import {
 import { formatBRL, MONTHS_PT } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { useReceivables } from "@/hooks/use-receivables";
 
 interface Props {
@@ -44,7 +45,7 @@ export function ReceivablesSection({ year, month, finance }: Props) {
   const [receivingId, setReceivingId] = useState<string | null>(null);
   const [receiveValue, setReceiveValue] = useState("");
 
-  const parse = (v: string) => Number(v.replace(/\./g, "").replace(",", ".")) || 0;
+  const parse = (v: string) => Number(v) || 0;
 
   const submitNew = async () => {
     if (!newDesc.trim()) return;
@@ -59,7 +60,7 @@ export function ReceivablesSection({ year, month, finance }: Props) {
     setEditingId(id);
     setExpandedId(id);
     setEditDesc(desc);
-    setEditAmount(String(amount).replace(".", ","));
+    setEditAmount(String(amount));
   };
 
   const submitEdit = async () => {
@@ -132,11 +133,11 @@ export function ReceivablesSection({ year, month, finance }: Props) {
               onChange={(e) => setNewDesc(e.target.value)}
               className="rounded-xl"
             />
-            <Input
+            <MoneyInput
               placeholder="0,00"
               inputMode="decimal"
               value={newAmount}
-              onChange={(e) => setNewAmount(e.target.value)}
+              onValueChange={setNewAmount}
               className="rounded-xl sm:w-36"
               onKeyDown={(e) => {
                 if (e.key === "Enter") submitNew();
@@ -234,10 +235,10 @@ export function ReceivablesSection({ year, month, finance }: Props) {
                             className="rounded-xl"
                             placeholder="Descrição"
                           />
-                          <Input
+                          <MoneyInput
                             value={editAmount}
                             inputMode="decimal"
-                            onChange={(e) => setEditAmount(e.target.value)}
+                            onValueChange={setEditAmount}
                             className="rounded-xl sm:w-32"
                             placeholder="0,00"
                             onKeyDown={(e) => {
@@ -305,12 +306,12 @@ export function ReceivablesSection({ year, month, finance }: Props) {
                           <span className="text-xs text-muted-foreground">
                             Valor recebido em {MONTHS_PT[month - 1]}:
                           </span>
-                          <Input
+                          <MoneyInput
                             autoFocus
                             placeholder="0,00"
                             inputMode="decimal"
                             value={receiveValue}
-                            onChange={(e) => setReceiveValue(e.target.value)}
+                            onValueChange={setReceiveValue}
                             className="rounded-xl sm:w-36"
                             onKeyDown={(e) => {
                               if (e.key === "Enter") submitReceive();
