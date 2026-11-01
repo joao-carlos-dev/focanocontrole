@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { recurringAppliesToMonth, remainingMonthsInYear } from "@/lib/recurring-period";
 
 export type Category = {
   id: string;
@@ -37,6 +38,8 @@ export type Recurring = {
   note: string | null;
   active: boolean;
   due_day: number | null;
+  start_year: number | null;
+  start_month: number | null;
 };
 
 const SKIP_KEY = "finance:skipped_recurring";
@@ -139,7 +142,7 @@ export function useFinance(year: number, month: number) {
       const toInsert = recList
         .filter(
           (r) =>
-            r.active &&
+            recurringAppliesToMonth(r, year, month) &&
             !existingCategoryIds.has(r.category_id) &&
             !skipped[skipKey(scopeKey, r.category_id, year, month)],
         )
@@ -228,7 +231,7 @@ export function useFinance(year: number, month: number) {
   ) => {
     if (!user) return;
     const existing = recurring.find((r) => r.category_id === category_id);
-    if (!existing) return;
+    if (!existing || !recurringAppliesToMonth(existing, year, month)) return;
     const { data } = await supabase
       .from("recurring_amounts")
       .update({
@@ -268,8 +271,7 @@ export function useFinance(year: number, month: number) {
     );
   };
 
-  // Create entries for every month of the current year that doesn't have one
-  // yet (and isn't explicitly skipped), so fixed accounts show up everywhere.
+  // Create missing entries only from the selected month through December.
   const propagateRecurringToYear = async (
     category_id: string,
     amount: number,
@@ -289,7 +291,7 @@ export function useFinance(year: number, month: number) {
     const day = due_day && due_day >= 1 && due_day <= 28 ? due_day : null;
 
     const rows: any[] = [];
-    for (let m = 1; m <= 12; m++) {
+    for (const m of remainingMonthsInYear(month)) {
       if (existingMonths.has(m)) continue;
       if (skipped[skipKey(scopeKey, category_id, year, m)]) continue;
       const due = day
@@ -559,10 +561,14 @@ export function useFinance(year: number, month: number) {
   ) => {
     if (!user) return;
     const existing = recurring.find((r) => r.category_id === category_id);
+    const start = existing && recurringAppliesToMonth(existing, year, month)
+      ? { start_year: existing.start_year, start_month: existing.start_month }
+      : { start_year: year, start_month: month };
     if (existing) {
       const { data } = await supabase
         .from("recurring_amounts")
         .update({
+          ...start,
           amount,
           note: note ?? null,
           active: true,
@@ -584,6 +590,7 @@ export function useFinance(year: number, month: number) {
       const { data } = await supabase
         .from("recurring_amounts")
         .insert({
+          ...start,
           user_id: user.id,
           group_id: activeGroupId,
           created_by: user.id,
@@ -667,7 +674,7 @@ export function useFinance(year: number, month: number) {
         ]);
     }
 
-    // Make sure this fixed value shows up in every other month of the year too.
+    // Only populate this month and later months, never earlier months.
     await propagateRecurringToYear(category_id, amount, note ?? null, due_day ?? null);
   };
 
@@ -681,7 +688,7 @@ export function useFinance(year: number, month: number) {
   return {
     categories,
     entries,
-    recurring,
+    recurring: recurring.filter((r) => recurringAppliesToMonth(r, year, month)),
     editorNames,
     loading,
     addEntry,

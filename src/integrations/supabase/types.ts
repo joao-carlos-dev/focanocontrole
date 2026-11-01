@@ -515,6 +515,8 @@ export type Database = {
           group_id: string | null
           id: string
           note: string | null
+          start_month: number | null
+          start_year: number | null
           updated_at: string
           updated_by: string | null
           user_id: string | null
@@ -529,6 +531,8 @@ export type Database = {
           group_id?: string | null
           id?: string
           note?: string | null
+          start_month?: number | null
+          start_year?: number | null
           updated_at?: string
           updated_by?: string | null
           user_id?: string | null
@@ -543,6 +547,8 @@ export type Database = {
           group_id?: string | null
           id?: string
           note?: string | null
+          start_month?: number | null
+          start_year?: number | null
           updated_at?: string
           updated_by?: string | null
           user_id?: string | null
