@@ -9,25 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VisaoAnualRouteImport } from './routes/visao-anual'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as VisaoAnualRouteImport } from './routes/visao-anual'
 
-const VisaoAnualRoute = VisaoAnualRouteImport.update({
-  id: '/visao-anual',
-  path: '/visao-anual',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -35,9 +25,19 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VisaoAnualRoute = VisaoAnualRouteImport.update({
+  id: '/visao-anual',
+  path: '/visao-anual',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -69,12 +69,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/auth' | '/perfil' | '/reset-password' | '/visao-anual'
   id:
-    | '__root__'
-    | '/'
-    | '/auth'
-    | '/perfil'
-    | '/reset-password'
-    | '/visao-anual'
+    '__root__' | '/' | '/auth' | '/perfil' | '/reset-password' | '/visao-anual'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -87,25 +82,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/visao-anual': {
-      id: '/visao-anual'
-      path: '/visao-anual'
-      fullPath: '/visao-anual'
-      preLoaderRoute: typeof VisaoAnualRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -115,11 +96,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/visao-anual': {
+      id: '/visao-anual'
+      path: '/visao-anual'
+      fullPath: '/visao-anual'
+      preLoaderRoute: typeof VisaoAnualRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
