@@ -52,46 +52,50 @@
 }
 
 :root {
-  /* Dark fintech theme by default */
+  /* User-selected Pantone palette; financial statuses retain semantic colors. */
+  --anthracite: oklch(0.2799 0.0092 294.97);
+  --volcanic-glass: oklch(0.4795 0.0119 335.73);
+  --deep-taupe: oklch(0.5257 0.0318 29.18);
+  --plaza-taupe: oklch(0.7180 0.0266 75.18);
   --radius: 0.875rem;
-  --background: oklch(0.18 0.02 260);
-  --foreground: oklch(0.98 0.01 255);
-  --card: oklch(0.22 0.025 260);
-  --card-foreground: oklch(0.98 0.01 255);
-  --popover: oklch(0.22 0.025 260);
-  --popover-foreground: oklch(0.98 0.01 255);
-  --primary: oklch(0.78 0.18 155);
-  --primary-foreground: oklch(0.18 0.02 260);
-  --primary-glow: oklch(0.85 0.2 155);
-  --secondary: oklch(0.28 0.03 260);
-  --secondary-foreground: oklch(0.98 0.01 255);
-  --muted: oklch(0.26 0.025 260);
-  --muted-foreground: oklch(0.7 0.02 260);
-  --accent: oklch(0.7 0.18 250);
-  --accent-foreground: oklch(0.18 0.02 260);
+  --background: var(--anthracite);
+  --foreground: oklch(0.96 0.008 75);
+  --card: oklch(0.32 0.01 335);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.34 0.011 335);
+  --popover-foreground: var(--foreground);
+  --primary: var(--plaza-taupe);
+  --primary-foreground: var(--anthracite);
+  --primary-glow: oklch(0.8 0.025 75);
+  --secondary: var(--volcanic-glass);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.38 0.012 335);
+  --muted-foreground: oklch(0.77 0.016 75);
+  --accent: var(--deep-taupe);
+  --accent-foreground: var(--foreground);
   --destructive: oklch(0.65 0.22 22);
   --destructive-foreground: oklch(0.98 0.01 255);
-  --border: oklch(0.3 0.025 260);
-  --input: oklch(0.28 0.025 260);
-  --ring: oklch(0.78 0.18 155);
+  --border: var(--volcanic-glass);
+  --input: oklch(0.42 0.012 335);
+  --ring: var(--plaza-taupe);
   --savings: oklch(0.72 0.16 220);
   --savings-foreground: oklch(0.18 0.02 260);
   --income: oklch(0.8 0.18 145);
   --income-foreground: oklch(0.18 0.02 260);
   --warning: oklch(0.78 0.17 75);
-  --gradient-primary: linear-gradient(135deg, oklch(0.78 0.18 155), oklch(0.7 0.18 220));
-  --gradient-card: linear-gradient(160deg, oklch(0.24 0.03 260), oklch(0.2 0.025 265));
-  --gradient-glow: radial-gradient(circle at 20% 0%, oklch(0.78 0.18 155 / 0.18), transparent 60%);
+  --gradient-primary: linear-gradient(135deg, var(--plaza-taupe), var(--deep-taupe));
+  --gradient-card: linear-gradient(160deg, var(--card), var(--anthracite));
+  --gradient-glow: linear-gradient(160deg, color-mix(in oklch, var(--deep-taupe) 12%, transparent), transparent 60%);
   --shadow-elegant: 0 10px 40px -12px oklch(0 0 0 / 0.5);
-  --shadow-glow: 0 0 40px oklch(0.78 0.18 155 / 0.25);
-  --chart-1: oklch(0.78 0.18 155);
-  --chart-2: oklch(0.7 0.18 220);
-  --chart-3: oklch(0.78 0.17 75);
-  --chart-4: oklch(0.65 0.22 22);
-  --chart-5: oklch(0.7 0.2 305);
-  --chart-6: oklch(0.72 0.16 180);
-  --chart-7: oklch(0.78 0.15 45);
-  --chart-8: oklch(0.6 0.2 280);
+  --shadow-glow: 0 0 40px color-mix(in oklch, var(--plaza-taupe) 20%, transparent);
+  --chart-1: var(--plaza-taupe);
+  --chart-2: oklch(0.66 0.04 29);
+  --chart-3: oklch(0.65 0.015 335);
+  --chart-4: oklch(0.85 0.025 75);
+  --chart-5: var(--deep-taupe);
+  --chart-6: oklch(0.76 0.035 29);
+  --chart-7: var(--volcanic-glass);
+  --chart-8: oklch(0.58 0.03 75);
 }
 
 @layer base {
