@@ -10,7 +10,7 @@ type MoneyInputProps = Omit<ComponentProps<typeof Input>, "type" | "value" | "on
 export const moneyFormat = {
   thousandSeparator: ".",
   decimalSeparator: ",",
-  allowedDecimalSeparators: [","],
+  allowedDecimalSeparators: [",", "."],
   decimalScale: 2,
   allowNegative: false,
 };
