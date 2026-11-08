@@ -26,5 +26,9 @@ test("decimal keypad point preserves cents instead of concatenating digits", () 
 });
 
 test("pasted Brazilian amount retains both the thousands point and decimal comma", () => {
-  assert.equal(removeNumericFormat("1.151,99", undefined, moneyFormat), "1151.99");
+  assert.equal(removeNumericFormat("1.151,99", {
+    from: { start: 0, end: 0 },
+    to: { start: 0, end: 8 },
+    lastValue: "",
+  }, moneyFormat), "1151.99");
 });
