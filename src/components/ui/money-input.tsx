@@ -2,7 +2,7 @@ import { NumericFormat } from "react-number-format";
 import type { ComponentProps } from "react";
 import { Input } from "@/components/ui/input";
 
-type MoneyInputProps = Omit<ComponentProps<typeof Input>, "type" | "value" | "onChange"> & {
+type MoneyInputProps = Omit<ComponentProps<typeof Input>, "type" | "value" | "onChange" | "defaultValue"> & {
   value: string;
   onValueChange: (value: string) => void;
 };
