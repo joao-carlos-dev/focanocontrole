@@ -6,3 +6,4 @@
 - [x] Add expand/collapse indicator to every account card.
 - [x] Give Dívidas and Dinheiro a receber rows the same open/close behavior.
 - [x] Replace the brand mark and browser-tab icon with the seal emblem.
+- [x] Verify automatic Brazilian money formatting and light clickable calendar controls.
