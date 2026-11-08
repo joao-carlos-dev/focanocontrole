@@ -115,7 +115,7 @@ export function CategoryRow({
 
   const statusCardClass =
     categoryStatus === "paid"
-      ? "border-primary/50"
+      ? "border-income/50"
       : categoryStatus === "overdue"
         ? "border-destructive/60"
         : categoryStatus === "upcoming"
@@ -123,7 +123,7 @@ export function CategoryRow({
           : "border-border";
   const statusHeaderClass =
     categoryStatus === "paid"
-      ? "bg-primary/10"
+      ? "bg-income/10"
       : categoryStatus === "overdue"
         ? "bg-destructive/10"
         : categoryStatus === "upcoming"
@@ -166,7 +166,7 @@ export function CategoryRow({
     if (allPaid) {
       return {
         text: "Pago",
-        cls: "border-primary/50 bg-primary/15 text-primary",
+        cls: "border-income/50 bg-income/15 text-income",
       };
     }
     return null;
@@ -223,8 +223,8 @@ export function CategoryRow({
       return e.paid
         ? {
             text: "Pago",
-            cls: "text-primary",
-            rowCls: "border-primary/40 bg-primary/10",
+            cls: "text-income",
+            rowCls: "border-income/40 bg-income/10",
             status: "Pago",
           }
         : null;
@@ -236,8 +236,8 @@ export function CategoryRow({
     if (e.paid)
       return {
         text: `${txt} • pago`,
-        cls: "text-primary",
-        rowCls: "border-primary/40 bg-primary/10",
+        cls: "text-income",
+        rowCls: "border-income/40 bg-income/10",
         status: "Pago",
       };
     if (diffDays < 0)
@@ -339,7 +339,7 @@ export function CategoryRow({
                       type="button"
                       size="sm"
                       variant={e.paid ? "secondary" : "outline"}
-                      className="h-7 shrink-0 gap-1 px-2 text-xs"
+                      className={`h-7 shrink-0 gap-1 px-2 text-xs ${e.paid ? "bg-income/15 text-income hover:bg-income/25" : ""}`}
                       onClick={() => onTogglePaid(e.id, !e.paid)}
                       title={e.paid ? "Marcar como não paga" : "Marcar como paga"}
                     >
