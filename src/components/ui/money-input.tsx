@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { NumericFormat } from "react-number-format";
 import { Input } from "@/components/ui/input";
-import { formatMoneyValue, normalizeExternal, parseMoneyText } from "@/lib/money-parse";
 
 type MoneyInputProps = Omit<
-  ComponentProps<typeof Input>,
+  React.ComponentProps<typeof Input>,
   "type" | "value" | "onChange" | "defaultValue"
 > & {
   value: string;
@@ -11,52 +10,25 @@ type MoneyInputProps = Omit<
 };
 
 export function MoneyInput({ value, onValueChange, ...props }: MoneyInputProps) {
-  const ref = useRef<HTMLInputElement>(null);
-  const tentative = useRef(false);
-  const internal = useRef(normalizeExternal(value));
-  const [display, setDisplay] = useState(() => formatMoneyValue(internal.current));
-
-  // Sync when the parent changes the value (reset, edit start, etc.).
-  useEffect(() => {
-    const ext = normalizeExternal(value);
-    if (ext !== internal.current && Number(ext || 0) !== Number(internal.current || 0)) {
-      internal.current = ext;
-      tentative.current = false;
-      setDisplay(formatMoneyValue(ext));
-    } else if (!value && internal.current) {
-      internal.current = "";
-      tentative.current = false;
-      setDisplay("");
-    }
-  }, [value]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const el = e.target;
-    const raw = el.value;
-    const fromEnd = raw.length - (el.selectionStart ?? raw.length);
-    const next = parseMoneyText(raw, tentative.current);
-    tentative.current = next.tentative;
-    internal.current = next.value;
-    const formatted = formatMoneyValue(next.value);
-    setDisplay(formatted);
-    onValueChange(next.value);
-    requestAnimationFrame(() => {
-      const input = ref.current;
-      if (!input || document.activeElement !== input) return;
-      const pos = Math.max(0, formatted.length - fromEnd);
-      input.setSelectionRange(pos, pos);
-    });
-  };
-
   return (
-    <Input
+    <NumericFormat
       {...props}
-      ref={ref}
-      type="text"
+      customInput={Input}
+      value={value}
+      thousandSeparator="."
+      decimalSeparator=","
+      decimalScale={2}
+      allowNegative={false}
       inputMode="decimal"
       autoComplete="off"
-      value={display}
-      onChange={handleChange}
+      onValueChange={(values) => onValueChange(values.value)}
     />
   );
+}
+
+export function moneyFormat(value: number): string {
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
